@@ -7,6 +7,10 @@ The site is designed to make the project easy to understand before introducing
 visual effects. Its signature interaction compares a baseline JSON response
 with a changed response through a keyboard-accessible drift lens.
 
+## Live site
+
+[alan-huang-portfolio.vercel.app](https://alan-huang-portfolio.vercel.app/)
+
 ## Featured work
 
 - [ContractLens](https://github.com/phatpanda6/contractlens)

@@ -21,6 +21,10 @@ test("prerenders Alan Huang's portfolio", async () => {
   assert.match(html, /NBA Player Hub/);
   assert.match(html, /mailto:ahuang24365@gmail\.com/);
   assert.match(html, /Skip to content/);
+  assert.match(
+    html,
+    /rel="canonical" href="https:\/\/alan-huang-portfolio\.vercel\.app\/?"/,
+  );
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape/);
 });
 

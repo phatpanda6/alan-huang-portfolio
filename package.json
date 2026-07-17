@@ -11,7 +11,7 @@
     "start": "next start",
     "test": "npm run build && node --test tests/rendered-html.test.mjs",
     "typecheck": "tsc --noEmit --incremental false",
-    "lint": "eslint . --ignore-pattern .next"
+    "lint": "eslint ."
   },
   "dependencies": {
     "next": "16.2.6",
