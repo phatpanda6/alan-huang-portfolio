@@ -31,7 +31,7 @@ runtime adapter.
 
 ## Local development
 
-Requires Node.js 22.13.0 or newer.
+Requires Node.js 24.
 
 ~~~bash
 npm install
