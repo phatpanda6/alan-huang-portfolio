@@ -16,15 +16,18 @@ with a changed response through a keyboard-accessible drift lens.
 ## Design and implementation
 
 - React 19 and TypeScript
-- vinext / Next.js-compatible App Router
+- Next.js 16 App Router
 - Tailwind CSS 4 plus custom responsive CSS
 - Semantic HTML with visible focus states and reduced-motion support
 - Pointer and keyboard control for the ContractLens comparison
-- Dynamic Open Graph metadata based on the request host
+- Deployment-aware Open Graph metadata for Vercel
 
 No smooth-scrolling or animation library is required. The depth effect is built
 with CSS perspective and a small React interaction so core content remains
 fast and readable without motion.
+
+The app is structured as a native Next.js deployment with no platform-specific
+runtime adapter.
 
 ## Local development
 

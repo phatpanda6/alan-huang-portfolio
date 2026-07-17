@@ -5,32 +5,14 @@ import test from "node:test";
 const root = new URL("../", import.meta.url);
 
 async function render() {
-  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
-  workerUrl.searchParams.set("test", process.pid + "-" + Date.now());
-  const { default: worker } = await import(workerUrl.href);
-
-  return worker.fetch(
-    new Request("http://localhost/", {
-      headers: { accept: "text/html" },
-    }),
-    {
-      ASSETS: {
-        fetch: async () => new Response("Not found", { status: 404 }),
-      },
-    },
-    {
-      waitUntil() {},
-      passThroughOnException() {},
-    },
+  return readFile(
+    new URL("../.next/server/app/index.html", import.meta.url),
+    "utf8",
   );
 }
 
-test("server-renders Alan Huang's portfolio", async () => {
-  const response = await render();
-  assert.equal(response.status, 200);
-  assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
-
-  const html = await response.text();
+test("prerenders Alan Huang's portfolio", async () => {
+  const html = await render();
   assert.match(html, /<title>Alan Huang \| Full-Stack Developer<\/title>/i);
   assert.match(html, /I build software that makes invisible failures/);
   assert.match(html, /ContractLens/);
@@ -57,7 +39,7 @@ test("removes starter assets and keeps accessibility safeguards", async () => {
   assert.match(component, /aria-valuetext/);
   assert.match(css, /:focus-visible/);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
-  assert.match(layout, /generateMetadata/);
+  assert.match(layout, /export const metadata/);
   assert.match(layout, /\/og\.png/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
 
