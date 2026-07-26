@@ -145,7 +145,8 @@ export default function Home() {
               </a>
             </div>
             <p className="hero-note">
-              Interested in junior full-stack and product-engineering roles.
+              Full-stack developer building reliable, thoughtfully designed web
+              products. Open to opportunities in Melbourne and Sydney.
             </p>
           </div>
 
@@ -411,10 +412,11 @@ export default function Home() {
         >
           <p className="mono-label">Let’s build something useful</p>
           <h2 id="contact-title">
-            Looking for a junior developer who thinks beyond the happy path?
+            Looking for a full-stack developer who thinks beyond the happy
+            path?
           </h2>
           <p>
-            I’m open to full-stack and product-engineering opportunities in
+            I’m open to full-stack software engineering opportunities in
             Melbourne and Sydney.
           </p>
           <div className="contact-actions">
