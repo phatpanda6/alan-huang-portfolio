@@ -20,14 +20,18 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: "Alan Huang | Full-Stack Developer",
   description:
-    "Full-stack developer building reliable TypeScript products, including ContractLens—a tool for detecting breaking API response changes.",
+    "Australia-based full-stack developer building reliable TypeScript products with React, Next.js, APIs and PostgreSQL. Currently building ContractLens.",
   keywords: [
     "Alan Huang",
     "full-stack developer",
     "TypeScript",
     "React",
     "Next.js",
+    "Node.js",
+    "PostgreSQL",
     "ContractLens",
+    "Melbourne",
+    "Sydney",
   ],
   authors: [{ name: "Alan Huang" }],
   creator: "Alan Huang",
@@ -36,7 +40,8 @@ export const metadata: Metadata = {
     type: "website",
     url: "/",
     title: "Alan Huang | Full-Stack Developer",
-    description: "Building ContractLens to make breaking API changes visible.",
+    description:
+      "Full-stack developer building ContractLens to detect breaking API changes before they reach users.",
     siteName: "Alan Huang",
     images: [
       {
@@ -50,7 +55,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Alan Huang | Full-Stack Developer",
-    description: "Building ContractLens to make breaking API changes visible.",
+    description:
+      "Full-stack developer building ContractLens to detect breaking API changes before they reach users.",
     images: ["/og.png"],
   },
   icons: {

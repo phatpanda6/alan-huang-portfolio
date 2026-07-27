@@ -16,8 +16,8 @@ test("prerenders Alan Huang's portfolio", async () => {
   assert.match(html, /<title>Alan Huang \| Full-Stack Developer<\/title>/i);
   assert.match(html, /I build software that makes invisible failures/);
   assert.match(html, /ContractLens/);
-  assert.match(html, /36 passing tests/);
-  assert.match(html, /Airtable Clone/);
+  assert.match(html, /Automated testing/);
+  assert.match(html, /Relational Workspace/);
   assert.match(html, /NBA Player Hub/);
   assert.match(html, /mailto:ahuang24365@gmail\.com/);
   assert.match(html, /Skip to content/);

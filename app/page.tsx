@@ -4,20 +4,21 @@ const proofPoints = [
   "TypeScript",
   "React",
   "Next.js",
-  "Prisma",
-  "36 passing tests",
+  "Node.js",
+  "PostgreSQL",
+  "Automated testing",
 ];
 
 const evidence = [
   {
     number: "01",
     title: "Schema inference",
-    copy: "Turns real JSON responses into a predictable type-shape that can be compared without hand-written contracts.",
+    copy: "Turns real JSON responses into a consistent schema that can be compared without hand-written contracts.",
   },
   {
     number: "02",
     title: "Recursive comparison",
-    copy: "Tracks missing fields, additions, type changes, nested objects and representative array item shapes with readable paths.",
+    copy: "Tracks missing fields, additions and type changes through nested objects and arrays while preserving readable paths.",
   },
   {
     number: "03",
@@ -27,21 +28,21 @@ const evidence = [
 ];
 
 const pipeline = [
-  { label: "response", state: "complete" },
+  { label: "fetch", state: "complete" },
   { label: "infer", state: "complete" },
   { label: "compare", state: "complete" },
   { label: "classify", state: "complete" },
-  { label: "persist", state: "active" },
+  { label: "persist", state: "complete" },
   { label: "explain", state: "next" },
 ];
 
 const projects = [
   {
     index: "02",
-    title: "Airtable Clone",
-    label: "Type-safe data interface",
+    title: "Relational Workspace",
+    label: "Type-safe relational workspace",
     description:
-      "A database-style workspace built with the T3 stack, using tRPC and Prisma to keep the client, API and relational data model aligned.",
+      "A relational workspace built with Next.js, tRPC and Prisma, keeping UI actions, API contracts and database types aligned end to end.",
     stack: ["Next.js", "tRPC", "Prisma", "Tailwind"],
     source: "https://github.com/phatpanda6/airtable-clone",
     live: "https://airtable-clone-chi-nine.vercel.app/",
@@ -50,9 +51,9 @@ const projects = [
   {
     index: "03",
     title: "NBA Player Hub",
-    label: "External API experience",
+    label: "Resilient API integration",
     description:
-      "A React search experience that turns external player data into a team-aware profile, with clear loading, no-result and rate-limit states.",
+      "Searches NBA players through an external API and presents profile and team data with explicit loading, empty and rate-limit states.",
     stack: ["React", "REST API", "Responsive UI", "Error states"],
     source: "https://github.com/phatpanda6/NBA-Player-Hub",
     live: "https://nba-player-hub.vercel.app/",
@@ -118,8 +119,8 @@ export default function Home() {
 
           <div className="hero-copy">
             <p className="eyebrow">
-              <span className="status-dot" /> Australia · Open to Melbourne /
-              Sydney roles
+              <span className="status-dot" /> Australia-based · Open to
+              Melbourne and Sydney roles
             </p>
             <h1 id="hero-title">
               I build software that makes invisible failures{" "}
@@ -127,9 +128,9 @@ export default function Home() {
             </h1>
             <p className="hero-intro">
               I’m a full-stack developer building reliable TypeScript products
-              from interface to API. My current focus is ContractLens—a tool
-              for catching breaking API response changes before users find
-              them.
+              across interfaces, APIs and databases. My current focus is
+              ContractLens—a tool that catches breaking API response changes
+              before they reach users.
             </p>
             <div className="hero-actions">
               <a className="button button-primary" href="#contractlens">
@@ -144,10 +145,6 @@ export default function Home() {
                 View GitHub <ExternalArrow />
               </a>
             </div>
-            <p className="hero-note">
-              Full-stack developer building reliable, thoughtfully designed web
-              products. Open to opportunities in Melbourne and Sydney.
-            </p>
           </div>
 
           <div className="hero-visual">
@@ -191,8 +188,8 @@ export default function Home() {
             <div className="case-heading-copy">
               <p>
                 ContractLens captures a live API response as a baseline,
-                infers its structure and compares later responses to surface
-                meaningful schema drift.
+                infers its structure and compares later responses to flag
+                missing fields and type changes before consumers break.
               </p>
               <div className="text-links">
                 <a
@@ -233,8 +230,9 @@ export default function Home() {
                 <h3>From response to decision</h3>
               </div>
               <p>
-                Solid nodes are implemented. The live edge is the persisted
-                run workflow; AI explanation stays deliberately last.
+                The comparison engine, baseline persistence and run history are
+                implemented. Current work focuses on safe endpoint fetching and
+                connecting the database-backed workflow to the browser.
               </p>
             </div>
             <ol className="pipeline" aria-label="ContractLens processing pipeline">
@@ -259,31 +257,31 @@ export default function Home() {
           <div className="status-grid" id="case-status">
             <article>
               <p className="status-label status-complete">Built</p>
-              <h3>The comparison core</h3>
+              <h3>Engine and persistence</h3>
               <ul>
-                <li>Schema inference from JSON values</li>
-                <li>Nested object and array comparison</li>
-                <li>Missing, new and type-changed fields</li>
-                <li>36 automated tests passing</li>
+                <li>Schema inference and recursive comparison</li>
+                <li>Baseline capture and durable reference schemas</li>
+                <li>Persisted baseline, PASS, FAIL and ERROR runs</li>
+                <li>Timeout, JSON and response-size protections</li>
               </ul>
             </article>
             <article>
               <p className="status-label status-active">Building now</p>
-              <h3>One persisted workflow</h3>
+              <h3>Safe browser workflow</h3>
               <ul>
-                <li>First-run baseline capture complete</li>
-                <li>Persisted TestRun history in progress</li>
-                <li>Deterministic PASS / FAIL results</li>
-                <li>Reloadable result history</li>
+                <li>SSRF-safe endpoint URL validation</li>
+                <li>Database-backed project and endpoint flow</li>
+                <li>Reloadable run-history interface</li>
+                <li>Transport edge-case test coverage</li>
               </ul>
             </article>
             <article>
               <p className="status-label status-next">Next</p>
-              <h3>Reliable public demo</h3>
+              <h3>Recruiter-ready public demo</h3>
               <ul>
-                <li>Hardened endpoint fetching</li>
                 <li>Continuous integration</li>
                 <li>Seeded two-minute demo</li>
+                <li>Production deployment and observability</li>
                 <li>AI explanation after the core</li>
               </ul>
             </article>
@@ -302,8 +300,8 @@ export default function Home() {
           <div className="work-heading">
             <h2 id="work-title">Different problems. Same end-to-end mindset.</h2>
             <p>
-              Earlier projects that helped me learn data modelling, API design
-              and responsive interface work.
+              Supporting projects demonstrating type-safe APIs, relational data
+              modelling and resilient third-party API interfaces.
             </p>
           </div>
 
@@ -388,10 +386,9 @@ export default function Home() {
           </div>
           <div className="about-copy">
             <p>
-              I’m a self-taught developer who enjoys turning ambiguous product
-              problems into small, testable features. I care about readable
-              code, useful tests and understanding every line I ship—including
-              code developed with AI assistance.
+              I turn ambiguous product problems into small, testable features.
+              I care about readable code, useful tests and being able to explain
+              the trade-offs behind every line I ship.
             </p>
           </div>
           <div className="principles-grid">
