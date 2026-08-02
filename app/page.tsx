@@ -361,7 +361,7 @@ export default function Home() {
                   </ul>
                   <div className="project-links">
                     <a href={project.live} target="_blank" rel="noreferrer">
-                      Open project <ExternalArrow />
+                      Open live project <ExternalArrow />
                     </a>
                     <a href={project.source} target="_blank" rel="noreferrer">
                       Source <ExternalArrow />
