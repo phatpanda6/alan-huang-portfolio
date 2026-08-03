@@ -364,7 +364,7 @@ export default function Home() {
                       Open live project <ExternalArrow />
                     </a>
                     <a href={project.source} target="_blank" rel="noreferrer">
-                      Source <ExternalArrow />
+                      View source <ExternalArrow />
                     </a>
                   </div>
                 </div>
