@@ -421,7 +421,7 @@ export default function Home() {
               className="button button-primary"
               href="mailto:ahuang24365@gmail.com"
             >
-              Start a conversation <ExternalArrow />
+              Email me <ExternalArrow />
             </a>
             <a
               className="button button-secondary"
