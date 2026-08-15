@@ -438,7 +438,7 @@ export default function Home() {
       <footer className="site-footer">
         <p>© 2026 Alan Huang</p>
         <div>
-          <a href="mailto:ahuang24365@gmail.com">Email</a>
+          <a href="mailto:ahuang24365@gmail.com">Email me</a>
           <a href="https://github.com/phatpanda6" target="_blank" rel="noreferrer">
             GitHub
           </a>
