@@ -99,7 +99,7 @@ export default function Home() {
         <nav className="site-nav" aria-label="Primary navigation">
           <a href="#work">Work</a>
           <a href="#about">About</a>
-          <a href="mailto:ahuang24365@gmail.com">Contact</a>
+          <a href="#contact">Contact</a>
           <a
             className="nav-external"
             href="https://github.com/phatpanda6"
