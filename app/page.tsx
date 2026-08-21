@@ -436,7 +436,7 @@ export default function Home() {
       </main>
 
       <footer className="site-footer">
-        <p>© 2026 Alan Huang</p>
+        <p>Designed and built by Alan Huang · © 2026</p>
         <div>
           <a href="mailto:ahuang24365@gmail.com">Email me</a>
           <a href="https://github.com/phatpanda6" target="_blank" rel="noreferrer">
