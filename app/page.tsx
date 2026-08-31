@@ -142,7 +142,7 @@ export default function Home() {
                 target="_blank"
                 rel="noreferrer"
               >
-                View GitHub <ExternalArrow />
+                View GitHub profile <ExternalArrow />
               </a>
             </div>
           </div>
