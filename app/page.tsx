@@ -429,7 +429,7 @@ export default function Home() {
               target="_blank"
               rel="noreferrer"
             >
-              LinkedIn <ExternalArrow />
+              View LinkedIn profile <ExternalArrow />
             </a>
           </div>
         </section>
