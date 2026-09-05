@@ -360,10 +360,20 @@ export default function Home() {
                     ))}
                   </ul>
                   <div className="project-links">
-                    <a href={project.live} target="_blank" rel="noreferrer">
+                    <a
+                      href={project.live}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={"Open live project: " + project.title}
+                    >
                       Open live project <ExternalArrow />
                     </a>
-                    <a href={project.source} target="_blank" rel="noreferrer">
+                    <a
+                      href={project.source}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={"View source: " + project.title}
+                    >
                       View source <ExternalArrow />
                     </a>
                   </div>
