@@ -1593,6 +1593,10 @@ section[id] {
     border-bottom: 1px solid var(--line-light);
   }
 
+  .status-grid article {
+    padding-bottom: 2rem;
+  }
+
   .evidence-card:last-child,
   .status-grid article:last-child,
   .principles-grid article:last-child {

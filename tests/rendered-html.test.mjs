@@ -57,6 +57,7 @@ test("removes starter assets and keeps accessibility safeguards", async () => {
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
   assert.match(css, /\.case-heading-copy\s*>\s*\.button\s*{[^}]*margin:/s);
   assert.match(css, /\.status-grid\s*{[^}]*scroll-margin-top:/s);
+  assert.match(css, /\.status-grid article\s*{[^}]*padding-bottom:\s*2rem/s);
   assert.match(layout, /export const metadata/);
   assert.match(layout, /\/og\.png/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
