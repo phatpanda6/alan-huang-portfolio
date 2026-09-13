@@ -817,6 +817,10 @@ section[id] {
   padding-bottom: 0.35rem;
 }
 
+.case-heading-copy > .button {
+  margin: 1.5rem 0;
+}
+
 .case-heading-copy > p,
 .work-heading > p,
 .about-copy p {
@@ -1031,6 +1035,7 @@ section[id] {
 .status-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  scroll-margin-top: 6.5rem;
   border-top: 1px solid var(--line-light);
 }
 
