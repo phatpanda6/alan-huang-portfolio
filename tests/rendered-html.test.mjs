@@ -28,6 +28,18 @@ test("prerenders Alan Huang's portfolio", async () => {
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape/);
 });
 
+test("makes the live ContractLens demo discoverable and keeps progress current", async () => {
+  const html = await render();
+  const hero = html.match(/<section class="hero"[\s\S]*?<\/section>/)?.[0];
+  assert.ok(hero, "Hero section is rendered");
+  assert.match(hero, /href="https:\/\/contractlens-iota\.vercel\.app\/"/);
+  assert.match(hero, /Try ContractLens live/);
+  assert.match(html, /Open ContractLens demo/);
+  assert.match(html, /shared between visitors/);
+  assert.match(html, /GitHub Actions and Playwright with PostgreSQL/);
+  assert.doesNotMatch(html, /Recruiter-ready public demo|Safe browser workflow/);
+});
+
 test("removes starter assets and keeps accessibility safeguards", async () => {
   const [page, component, css, layout, packageJson] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),

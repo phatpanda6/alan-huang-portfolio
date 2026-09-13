@@ -1,5 +1,7 @@
 import { DriftLens } from "./components/DriftLens";
 
+const contractLensDemo = "https://contractlens-iota.vercel.app/";
+
 const proofPoints = [
   "TypeScript",
   "React",
@@ -22,8 +24,8 @@ const evidence = [
   },
   {
     number: "03",
-    title: "Baseline persistence",
-    copy: "Captures the first live response and its inferred schema through Prisma so later checks have a durable reference point.",
+    title: "Reviewed baseline changes",
+    copy: "Stores contracts and check history in PostgreSQL. Accepting a reviewed response updates the baseline without rewriting earlier failed checks.",
   },
 ];
 
@@ -133,16 +135,14 @@ export default function Home() {
               before they reach users.
             </p>
             <div className="hero-actions">
-              <a className="button button-primary" href="#contractlens">
-                Inspect ContractLens <span aria-hidden="true">↓</span>
+              <a className="button button-primary" href={contractLensDemo} target="_blank" rel="noreferrer">
+                Try ContractLens live <ExternalArrow />
               </a>
               <a
                 className="button button-secondary"
-                href="https://github.com/phatpanda6"
-                target="_blank"
-                rel="noreferrer"
+                href="#contractlens"
               >
-                View GitHub profile <ExternalArrow />
+                Read the case study <span aria-hidden="true">↓</span>
               </a>
             </div>
           </div>
@@ -174,7 +174,7 @@ export default function Home() {
           <div className="section-kicker">
             <span>01 / Featured build</span>
             <span className="build-status">
-              <i /> Active development
+              <i /> Live demo · Iterating
             </span>
           </div>
 
@@ -190,6 +190,15 @@ export default function Home() {
                 ContractLens captures a live API response as a baseline,
                 infers its structure and compares later responses to flag
                 missing fields and type changes before consumers break.
+              </p>
+              <a className="button button-primary" href={contractLensDemo} target="_blank" rel="noreferrer">
+                Open ContractLens demo <ExternalArrow />
+              </a>
+              <p>
+                No sign-up needed. Try Original response v1, then Changed
+                response v2 to inspect the diff. Accept a reviewed response as
+                the new baseline and run again. The demo uses built-in endpoints;
+                baseline and history are shared between visitors.
               </p>
               <div className="text-links">
                 <a
@@ -230,9 +239,10 @@ export default function Home() {
                 <h3>From response to decision</h3>
               </div>
               <p>
-                The comparison engine, baseline persistence and run history are
-                implemented. Current work focuses on safe endpoint fetching and
-                connecting the database-backed workflow to the browser.
+                The live dashboard connects safe endpoint fetching, deterministic
+                comparison and PostgreSQL-backed history. Review field-level
+                changes, switch between response and schema views, and explicitly
+                accept a new baseline. AI explanations remain future work.
               </p>
             </div>
             <ol className="pipeline" aria-label="ContractLens processing pipeline">
@@ -257,32 +267,32 @@ export default function Home() {
           <div className="status-grid" id="case-status">
             <article>
               <p className="status-label status-complete">Built</p>
-              <h3>Engine and persistence</h3>
+              <h3>Complete browser workflow</h3>
               <ul>
                 <li>Schema inference and recursive comparison</li>
-                <li>Baseline capture and durable reference schemas</li>
-                <li>Persisted baseline, PASS, FAIL and ERROR runs</li>
-                <li>Timeout, JSON and response-size protections</li>
+                <li>Live baseline capture and explicit acceptance</li>
+                <li>PostgreSQL-backed results and reloadable history</li>
+                <li>Field-level diffs and response/schema views</li>
               </ul>
             </article>
             <article>
-              <p className="status-label status-active">Building now</p>
-              <h3>Safe browser workflow</h3>
+              <p className="status-label status-complete">Verified by tests</p>
+              <h3>Safety and delivery</h3>
               <ul>
-                <li>SSRF-safe endpoint URL validation</li>
-                <li>Database-backed project and endpoint flow</li>
-                <li>Reloadable run-history interface</li>
-                <li>Transport edge-case test coverage</li>
+                <li>URL and redirect validation with bounded fetching</li>
+                <li>Hosted demo restricted to built-in endpoints</li>
+                <li>Vitest engine and API route tests</li>
+                <li>GitHub Actions and Playwright with PostgreSQL</li>
               </ul>
             </article>
             <article>
               <p className="status-label status-next">Next</p>
-              <h3>Recruiter-ready public demo</h3>
+              <h3>Release polish and extensions</h3>
               <ul>
-                <li>Continuous integration</li>
-                <li>Seeded two-minute demo</li>
-                <li>Production deployment and observability</li>
-                <li>AI explanation after the core</li>
+                <li>Targeted accessibility and failure-state audit</li>
+                <li>Short recorded workflow walkthrough</li>
+                <li>CLI reusing the deterministic engine</li>
+                <li>AI explanations without control over PASS/FAIL</li>
               </ul>
             </article>
           </div>
