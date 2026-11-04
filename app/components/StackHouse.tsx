@@ -1,216 +1,323 @@
 "use client";
+
 import dynamic from "next/dynamic";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { featuredProjectId, projects, type Project } from "../projects";
+import { contactEmail, themeVars } from "../theme";
+
 const Restaurant = dynamic(() => import("./Restaurant"), {
   ssr: false,
   loading: () => (
-    <div className="room scene-fallback">
-      Warming up the grill…<a href="#menu">View the project menu ↓</a>
+    <div className="room scene-fallback" role="status">
+      Loading the diner… <a href="#menu">View selected work</a>
     </div>
   ),
 });
+
+const github = "https://github.com/phatpanda6";
+const linkedin = "https://www.linkedin.com/in/alan-huang-943257244/";
+const walkthrough =
+  "https://www.loom.com/share/789d89b95aa64d328a32f2c0d16136d5";
+const email = `mailto:${contactEmail}`;
 const Arrow = () => <span aria-hidden="true">↗</span>;
-function BurgerMark() {
+
+function Brand() {
   return (
-    <span className="burger-mark" aria-hidden="true">
-      <i />
-      <i />
-      <i />
-    </span>
+    <a className="house-brand" href="#top">
+      <span className="brand-mark" aria-hidden="true">
+        <i />
+        <i />
+        <i />
+      </span>
+      <span>
+        Alan Huang <small>Stack House</small>
+      </span>
+    </a>
   );
 }
-function SampleCheck() {
-  const [changed, setChanged] = useState(false);
+
+function Tags({ project }: { project: Project }) {
   return (
-    <div className="sample-check">
-      <div className="sample-head">
-        <span>INTERACTIVE EXAMPLE</span>
-        <b data-failed={changed}>{changed ? "FAIL" : "PASS"}</b>
-      </div>
-      <code>
-        baseline.price <span>89.99</span>
-      </code>
-      <code>
-        latest.price <span>{changed ? '"89.99"' : "89.99"}</span>
-      </code>
-      <p role="status">
-        {changed
-          ? "Price changed from number to string. A frontend expecting a number may break."
-          : "The price types match. No breaking change in this example."}
-      </p>
-      <button className="house-button" onClick={() => setChanged(!changed)}>
-        {changed ? "Restore compatible response" : "Ship a breaking change"}{" "}
-        <Arrow />
-      </button>
+    <ul className="house-tags" aria-label={`${project.title} technologies`}>
+      {project.stack.map((item) => (
+        <li key={item}>{item}</li>
+      ))}
+    </ul>
+  );
+}
+
+function Evidence({ project }: { project: Project }) {
+  return (
+    <div className="project-evidence">
+      <span className="tiny-label">{project.evidence.label}</span>
+      <p>{project.evidence.detail}</p>
     </div>
   );
 }
+
+function SampleCheck() {
+  const [changed, setChanged] = useState(false);
+  const baseline = 89.99;
+  const candidate = changed ? "89.99" : 89.99;
+  const failed = typeof baseline !== typeof candidate;
+  return (
+    <div className="sample-check">
+      <div className="sample-head">
+        <span>
+          <i aria-hidden="true" /> CONTRACT CHECK
+        </span>
+        <b data-failed={failed}>{failed ? "FAIL" : "PASS"}</b>
+      </div>
+      <div className="sample-body">
+        <p className="tiny-label">RESPONSE SHAPE / PRODUCTS API</p>
+        <div className="sample-code">
+          <div>
+            <span>Baseline</span>
+            <code>
+              price: <b>{JSON.stringify(baseline)}</b>
+            </code>
+          </div>
+          <div data-changed={failed}>
+            <span>Candidate</span>
+            <code>
+              price: <b>{JSON.stringify(candidate)}</b>
+            </code>
+          </div>
+        </div>
+        <p className="sample-result" role="status">
+          {failed
+            ? "Breaking change: price is now a string. A storefront expecting a number could fail."
+            : "Both responses return a number. The price contract passes this check."}
+        </p>
+        <button className="sample-action" onClick={() => setChanged(!changed)}>
+          {changed ? "Restore numeric price" : "Simulate a breaking change"}{" "}
+          <span aria-hidden="true">{changed ? "↺" : "→"}</span>
+        </button>
+        <p className="sample-caption">
+          Interactive example · runs in this page
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function DinerIllustration() {
+  return (
+    <svg
+      className="diner-illustration"
+      viewBox="0 0 720 360"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <defs>
+        <linearGradient id="diner-wall" x2="0" y2="1">
+          <stop stopColor="var(--white)" />
+          <stop offset="1" stopColor="var(--steel)" />
+        </linearGradient>
+        <linearGradient id="diner-floor" x2="0" y2="1">
+          <stop stopColor="var(--tile)" />
+          <stop offset="1" stopColor="var(--paper)" />
+        </linearGradient>
+      </defs>
+      <path d="M0 0H720V360H0Z" fill="url(#diner-wall)" />
+      <path d="M0 224 180 163H540L720 224V360H0Z" fill="url(#diner-floor)" />
+      <path
+        d="M0 35 180 82V163L0 224ZM720 35 540 82V163L720 224Z"
+        fill="var(--sky)"
+      />
+      <path d="M180 82H540V180H180Z" fill="var(--paper)" />
+      <path
+        d="M0 208 180 156H540L720 208"
+        fill="none"
+        stroke="var(--red)"
+        strokeWidth="9"
+      />
+      <path
+        d="M80 360 239 176M239 360 310 176M481 360 410 176M640 360 481 176M0 260H720M0 310H720"
+        fill="none"
+        stroke="var(--white)"
+        strokeOpacity=".65"
+        strokeWidth="2"
+      />
+      <path d="M181 180H539L557 199H163Z" fill="var(--steel)" />
+      <path d="M163 199H557V244H163Z" fill="var(--white)" />
+      <path d="M163 204H557V212H163Z" fill="var(--red)" />
+      {[210, 289, 368, 447].map((x) => (
+        <g key={x}>
+          <rect
+            x={x}
+            y="112"
+            width="63"
+            height="47"
+            rx="3"
+            fill="var(--white)"
+            stroke="var(--accent)"
+            strokeWidth="2"
+          />
+          <path
+            d={`M${x + 12} 130h39m-39 9h24`}
+            stroke="var(--red)"
+            strokeWidth="3"
+            strokeLinecap="round"
+          />
+        </g>
+      ))}
+      <rect
+        x="285"
+        y="76"
+        width="150"
+        height="25"
+        rx="4"
+        fill="var(--accent)"
+      />
+      <text
+        x="360"
+        y="93"
+        textAnchor="middle"
+        fill="var(--white)"
+        fontSize="11"
+        fontWeight="700"
+        letterSpacing="2"
+      >
+        STACK HOUSE
+      </text>
+      <path
+        d="M0 248 97 219V259L0 298ZM720 248 623 219V259L720 298Z"
+        fill="var(--accent)"
+      />
+      <path
+        d="M0 292 111 255 151 272 0 335ZM720 292 609 255 569 272 720 335Z"
+        fill="var(--red)"
+      />
+      <path
+        d="M41 262 134 231 197 248 101 288ZM679 262 586 231 523 248 619 288Z"
+        fill="var(--white)"
+      />
+      <ellipse
+        cx="360"
+        cy="325"
+        rx="40"
+        ry="10"
+        fill="var(--ink)"
+        opacity=".18"
+      />
+      <path d="M338 286h17v38h-17zm27 0h17v38h-17z" fill="var(--ink)" />
+      <rect x="326" y="248" width="68" height="54" rx="24" fill="var(--red)" />
+      <rect x="350" y="269" width="20" height="15" rx="4" fill="var(--gold)" />
+      <circle cx="332" cy="225" r="13" fill="var(--ink)" />
+      <circle cx="388" cy="225" r="13" fill="var(--ink)" />
+      <ellipse cx="360" cy="241" rx="34" ry="29" fill="var(--white)" />
+    </svg>
+  );
+}
+
 export function StackHouse() {
   const [selected, setSelected] = useState<Project | null>(null);
-  const [showRoom, setShowRoom] = useState(true);
+  const [showRoom, setShowRoom] = useState(false);
   const dialog = useRef<HTMLDialogElement>(null);
   const feature =
     projects.find((p) => p.id === featuredProjectId) ?? projects[0];
   useEffect(() => {
-    if (selected) dialog.current?.showModal();
-    else dialog.current?.close();
+    const element = dialog.current;
+    if (selected && element && !element.open) element.showModal();
+    else if (!selected && element?.open) element.close();
   }, [selected]);
   function select(id: string) {
     setSelected(projects.find((p) => p.id === id) ?? null);
   }
+
   return (
-    <div className="stack-house">
+    <div className="stack-house" id="top" style={themeVars as CSSProperties}>
       <a className="house-skip" href="#main-content">
         Skip to content
       </a>
       <header className="house-header">
-        <a className="house-brand" href="#">
-          <BurgerMark />
-          <span>
-            ALAN’S
-            <br />
-            <b>STACK HOUSE</b>
-          </span>
-        </a>
-        <nav aria-label="Main navigation">
-          <a href="#menu">The work</a>
-          <a href="#about">The maker</a>
-          <a className="header-contact" href="mailto:ahuang24365@gmail.com">
-            Say hello <Arrow />
+        <div className="header-inner">
+          <Brand />
+          <nav aria-label="Main navigation">
+            <a href="#menu">Work</a>
+            <a href="#diner">3D diner</a>
+            <a href="#about">About</a>
+          </nav>
+          <a className="header-contact" href={email}>
+            Contact <Arrow />
           </a>
-        </nav>
+        </div>
       </header>
       <main id="main-content">
-        <section className="house-intro" aria-labelledby="intro-title">
-          <div>
-            <p className="tiny-label">ALAN HUANG / FULL-STACK DEVELOPER</p>
-            <h1 id="intro-title">
-              Good software.
-              <br />
-              <em>Made from scratch.</em>
-            </h1>
-          </div>
-          <div className="intro-aside">
-            <p>
-              I build across interfaces, APIs and databases. Come in, look
-              around, and see what’s cooking.
-            </p>
-            <span>
-              <i /> Open to roles in Melbourne & Sydney
-            </span>
-          </div>
-        </section>
-        <section
-          className="experience"
-          aria-label="Explore the portfolio restaurant"
-        >
-          <div className="experience-top">
-            <span>
-              <i /> INTERACTIVE PORTFOLIO — FIRST DRAFT
-            </span>
-            <button onClick={() => setShowRoom(!showRoom)}>
-              {showRoom ? "Hide 3D / less motion" : "Show 3D restaurant"}
-            </button>
-          </div>
-          {showRoom ? (
-            <Restaurant onSelect={select} />
-          ) : (
-            <div className="quiet-room">
-              <BurgerMark />
-              <h2>
-                All the good stuff.
-                <br />
-                Right on the menu.
-              </h2>
-              <a className="house-button" href="#menu">
-                View projects ↓
-              </a>
-            </div>
-          )}
-          <div className="experience-bottom">
-            <span>Walk in. Look around. Pick a project.</span>
-            <a href="#menu">Prefer the menu? All projects below ↓</a>
+        <section className="house-intro shell" aria-labelledby="intro-title">
+          <p className="intro-role">
+            <i /> ALAN HUANG <span>·</span> FULL-STACK DEVELOPER
+          </p>
+          <h1 id="intro-title">
+            Software that
+            <br />
+            <em>holds up.</em>
+          </h1>
+          <p className="intro-description">
+            I build interfaces, APIs and the systems behind them. Based in
+            Australia, open to full-stack roles in Melbourne and Sydney.
+          </p>
+          <div className="hero-actions">
+            <a className="house-button" href="#menu">
+              Explore my work <span aria-hidden="true">↓</span>
+            </a>
+            <a
+              className="secondary-button"
+              href={github}
+              target="_blank"
+              rel="noreferrer"
+            >
+              GitHub <Arrow />
+            </a>
           </div>
         </section>
-        <div className="house-marquee" aria-label="Development interests">
-          <span>INTERFACES WITH INTENT</span>
-          <b>✳</b>
-          <span>APIS THAT MAKE SENSE</span>
-          <b>✳</b>
-          <span>CARE AT EVERY LAYER</span>
-          <b>✳</b>
-          <span>ALWAYS LEARNING</span>
-        </div>
+
         <section
           id="menu"
-          className="project-menu"
+          className="project-menu shell"
           aria-labelledby="menu-title"
         >
-          <div className="menu-heading">
+          <div className="section-heading">
             <div>
-              <p className="tiny-label">THE PROJECT MENU</p>
-              <h2 id="menu-title">
-                Something for
-                <br />
-                <em>every layer.</em>
-              </h2>
+              <p className="tiny-label">01 / THE PROJECT MENU</p>
+              <h2 id="menu-title">Selected work</h2>
             </div>
-            <p>
-              A selection of things I’ve built, problems I’ve worked through,
-              and tools I’m learning. Pick one for the full story.
-            </p>
+            <p>What I built, how it works, and the decisions behind it.</p>
           </div>
           <article className="special">
-            <div className="special-art" aria-hidden="true">
-              <div className="plate">
-                <div className="css-burger">
-                  <i className="bun-top" />
-                  <i className="lettuce" />
-                  <i className="tomato" />
-                  <i className="cheese" />
-                  <i className="patty" />
-                  <i className="bun-bottom" />
-                </div>
-              </div>
-              <span className="special-seal">
-                THE HOUSE
-                <br />
-                <b>SPECIAL</b>
-                <br />№ {feature.number}
-              </span>
-              <span className="art-caption">
-                A LITTLE CURIOSITY. A LOT OF LAYERS.
-              </span>
-            </div>
             <div className="special-copy">
-              <span className="tiny-label">
-                FEATURED PROJECT / {feature.category.toUpperCase()}
-              </span>
+              <p className="feature-label">
+                <i /> FEATURED PROJECT <span> / {feature.category}</span>
+              </p>
               <h3>{feature.title}</h3>
-              <p className="special-tagline">{feature.tagline}</p>
-              <p>{feature.description}</p>
-              <ul
-                className="house-tags"
-                aria-label="Featured project technologies"
-              >
-                {feature.stack.map((s) => (
-                  <li key={s}>{s}</li>
-                ))}
-              </ul>
-              <div className="special-actions">
+              <p className="feature-description">{feature.description}</p>
+              <Evidence project={feature} />
+              <Tags project={feature} />
+              <div className="project-actions">
                 <button
                   className="house-button"
                   onClick={() => select(feature.id)}
                 >
-                  Explore the project <Arrow />
+                  Read case study <span aria-hidden="true">→</span>
                 </button>
                 {feature.live && (
                   <a href={feature.live} target="_blank" rel="noreferrer">
-                    Live demo <Arrow />
+                    Try live app <Arrow />
                   </a>
                 )}
               </div>
+            </div>
+            <div className="feature-visual">
+              {feature.id === "contractlens" ? (
+                <SampleCheck />
+              ) : (
+                <div className="sample-check sample-body">
+                  <span className="tiny-label">{feature.category}</span>
+                  <h3>{feature.title}</h3>
+                  <p>{feature.tagline}</p>
+                </div>
+              )}
             </div>
           </article>
           <div className="menu-grid">
@@ -224,17 +331,14 @@ export function StackHouse() {
                   </div>
                   <h3>{p.title}</h3>
                   <p>{p.description}</p>
-                  <ul
-                    className="house-tags"
-                    aria-label={`${p.title} technologies`}
-                  >
-                    {p.stack.map((s) => (
-                      <li key={s}>{s}</li>
-                    ))}
-                  </ul>
+                  <Evidence project={p} />
+                  <Tags project={p} />
                   <div className="item-bottom">
-                    <button onClick={() => select(p.id)}>
-                      Take a closer look <Arrow />
+                    <button
+                      aria-label={`Read about ${p.title}`}
+                      onClick={() => select(p.id)}
+                    >
+                      Details <span aria-hidden="true">→</span>
                     </button>
                     <a
                       href={p.source}
@@ -242,99 +346,113 @@ export function StackHouse() {
                       rel="noreferrer"
                       aria-label={`View ${p.title} source code`}
                     >
-                      GitHub <Arrow />
+                      Source <Arrow />
                     </a>
                   </div>
                 </article>
               ))}
           </div>
         </section>
-        <section id="about" className="maker" aria-labelledby="maker-title">
-          <div className="maker-badge" aria-hidden="true">
-            <BurgerMark />
-            <span>
-              CURIOUS MIND
-              <br />
-              <b>CAREFUL HANDS</b>
-            </span>
-            <small>ALAN HUANG / AUSTRALIA</small>
+
+        <section
+          id="diner"
+          className="experience shell"
+          aria-labelledby="diner-title"
+        >
+          <div className="section-heading">
+            <div>
+              <p className="tiny-label">02 / THE INTERACTIVE PORTFOLIO</p>
+              <h2 id="diner-title">Step into Stack House.</h2>
+            </div>
+            <p>
+              A playable diner built with React Three Fiber. Walk up to the menu
+              boards to explore the same projects.
+            </p>
+          </div>
+          <div className="experience-frame" id="diner-scene">
+            {showRoom ? (
+              <Restaurant onSelect={select} />
+            ) : (
+              <div className="diner-poster">
+                <DinerIllustration />
+                <span className="poster-label">
+                  <i /> STACK HOUSE / 3D
+                </span>
+              </div>
+            )}
+          </div>
+          <div className="experience-bottom">
+            <p>Optional experience · keyboard and touch controls</p>
+            <button
+              className={showRoom ? "secondary-button" : "house-button"}
+              aria-expanded={showRoom}
+              aria-controls="diner-scene"
+              onClick={() => setShowRoom(!showRoom)}
+            >
+              {showRoom ? "Close 3D scene" : "Load the 3D diner"}{" "}
+              <span aria-hidden="true">{showRoom ? "×" : "→"}</span>
+            </button>
+          </div>
+        </section>
+
+        <section
+          id="about"
+          className="maker shell"
+          aria-labelledby="maker-title"
+        >
+          <div>
+            <p className="tiny-label">03 / ABOUT ME</p>
+            <h2 id="maker-title">Across the stack.</h2>
           </div>
           <div>
-            <p className="tiny-label">MEET THE MAKER</p>
-            <h2 id="maker-title">
-              A good result starts
-              <br />
-              with <em>good questions.</em>
-            </h2>
             <p>
-              I’m Alan, a full-stack developer who likes understanding how the
-              whole thing works. I build interfaces, trace requests through
-              APIs, and work with the data behind them.
+              I’m Alan. I like tracing a problem all the way from the interface
+              to the data and back. My projects are how I practise shipping
+              complete workflows, testing what matters, and explaining the
+              trade-offs.
             </p>
             <p>
-              My projects are how I practise: small, complete workflows, useful
-              tests, and decisions I can explain. Right now, I’m looking for my
-              first full-stack developer role in Melbourne or Sydney.
+              I’m looking for my first full-stack developer role. I’m especially
+              interested in building useful product features and making them
+              reliable as they grow.
             </p>
-            <a
-              href="https://github.com/phatpanda6"
-              target="_blank"
-              rel="noreferrer"
-            >
-              See what I’m building on GitHub <Arrow />
+            <a href={linkedin} target="_blank" rel="noreferrer">
+              Connect on LinkedIn <Arrow />
             </a>
           </div>
         </section>
-        <section className="house-contact" id="contact">
-          <span className="tiny-label">THERE’S ALWAYS ROOM AT THE TABLE</span>
-          <h2>
-            Got something
-            <br />
-            <em>good cooking?</em>
-          </h2>
-          <a className="house-button cream" href="mailto:ahuang24365@gmail.com">
-            Let’s talk <Arrow />
-          </a>
-          <a className="email-link" href="mailto:ahuang24365@gmail.com">
-            ahuang24365@gmail.com
+
+        <section id="contact" className="house-contact shell">
+          <div>
+            <p className="tiny-label">AVAILABLE FOR FULL-STACK ROLES</p>
+            <h2>Let’s talk.</h2>
+          </div>
+          <a className="house-button" href={email}>
+            {contactEmail} <Arrow />
           </a>
         </section>
       </main>
-      <footer className="house-footer">
-        <a className="house-brand" href="#">
-          <BurgerMark />
-          <span>
-            ALAN’S
-            <br />
-            <b>STACK HOUSE</b>
-          </span>
-        </a>
-        <p>A portfolio by Alan Huang · 2026</p>
+      <footer className="house-footer shell">
+        <Brand />
+        <p>Designed and built by Alan Huang</p>
         <div>
-          <a
-            href="https://github.com/phatpanda6"
-            target="_blank"
-            rel="noreferrer"
-          >
+          <a href={github} target="_blank" rel="noreferrer">
             GitHub <Arrow />
           </a>
-          <a
-            href="https://www.linkedin.com/in/alan-huang-943257244/"
-            target="_blank"
-            rel="noreferrer"
-          >
+          <a href={linkedin} target="_blank" rel="noreferrer">
             LinkedIn <Arrow />
           </a>
-          <a href="#">Back to top ↑</a>
+          <a href="#top">Top ↑</a>
         </div>
       </footer>
+
       <dialog
         ref={dialog}
         className="project-dialog"
         aria-label={selected?.title ?? "Project details"}
         onCancel={() => setSelected(null)}
-        onClick={(e) => {
-          if (e.target === dialog.current) setSelected(null);
+        onClick={(event) => {
+          if (event.target === dialog.current) setSelected(null);
         }}
       >
         {selected && (
@@ -344,26 +462,22 @@ export function StackHouse() {
               onClick={() => setSelected(null)}
               aria-label="Close project details"
             >
-              ✕
+              ×
             </button>
-            <span className="tiny-label">
-              ORDER № {selected.number} / {selected.category}
-            </span>
+            <p className="tiny-label">
+              {selected.number} / {selected.category}
+            </p>
             <h2>{selected.title}</h2>
             <p className="dialog-tagline">{selected.tagline}</p>
             <p>{selected.description}</p>
-            <ul className="house-tags">
-              {selected.stack.map((s) => (
-                <li key={s}>{s}</li>
-              ))}
-            </ul>
-            <h3>What’s inside</h3>
+            <Tags project={selected} />
+            <Evidence project={selected} />
+            <h3>How it works</h3>
             <ul className="project-highlights">
               {selected.highlights.map((s) => (
                 <li key={s}>{s}</li>
               ))}
             </ul>
-            {selected.id === "contractlens" && <SampleCheck />}
             <p className="project-note">{selected.note}</p>
             <div className="dialog-links">
               {selected.live && (
@@ -380,11 +494,7 @@ export function StackHouse() {
                 View source <Arrow />
               </a>
               {selected.id === "contractlens" && (
-                <a
-                  href="https://www.loom.com/share/789d89b95aa64d328a32f2c0d16136d5"
-                  target="_blank"
-                  rel="noreferrer"
-                >
+                <a href={walkthrough} target="_blank" rel="noreferrer">
                   Watch walkthrough <Arrow />
                 </a>
               )}

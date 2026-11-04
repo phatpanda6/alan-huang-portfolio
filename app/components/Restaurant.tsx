@@ -3,27 +3,69 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
   Component,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
   type ReactNode,
   type RefObject,
+  type PointerEvent as ReactPointerEvent,
 } from "react";
 import * as THREE from "three";
 import { projects, featuredProjectId } from "../projects";
+import { palette } from "../theme";
 
 type Vec = [number, number, number];
 type Controls = {
   keys: Set<string>;
   yaw: number;
   pitch: number;
+  yawVelocity: number;
+  pitchVelocity: number;
+  reducedMotion: boolean;
   reset: boolean;
 };
 
-const DINER_RED = "#c4202e";
-const DINER_WHITE = "#f6f4ed";
-const CHROME = "#a9b1bc";
+type OrbitSample = { x: number; y: number; time: number };
+type OrbitDrag = {
+  pointerId: number;
+  start: OrbitSample;
+  last: OrbitSample;
+  samples: OrbitSample[];
+  tracking: boolean;
+};
+
+const DINER_RED = palette.red;
+const DINER_WHITE = palette.paper;
+const CHROME = palette.steel;
+const YAW_PER_PIXEL = 0.004;
+const PITCH_PER_PIXEL = 0.003;
+const ORBIT_FRICTION = 12;
+const ORBIT_THRESHOLD = 8;
+const PRESS_KEYS = new Set([
+  "w",
+  "a",
+  "s",
+  "d",
+  "ArrowUp",
+  "ArrowDown",
+  "ArrowLeft",
+  "ArrowRight",
+]);
+
+function moveKey(key: string) {
+  return key.length === 1 ? key.toLowerCase() : key;
+}
+
+function pitchWithinRoom(pitch: number) {
+  return THREE.MathUtils.clamp(pitch, -0.55, 0.5);
+}
+
+function stopOrbit(controls: Controls) {
+  controls.yawVelocity = 0;
+  controls.pitchVelocity = 0;
+}
 const LEFT_BOOTHS = [1.7, 4.8];
 const RIGHT_BOOTHS = [0.4, 3.7];
 
@@ -65,8 +107,8 @@ function Sign({
   position,
   width = 2,
   height = 0.7,
-  color = "#f8e9cc",
-  ink = "#293d34",
+  color = palette.white,
+  ink = palette.ink,
   onClick,
 }: {
   text: string;
@@ -92,7 +134,7 @@ function Sign({
     ctx.fillStyle = ink;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.font = `900 ${Math.min(115, h * 0.36)}px Arial`;
+    ctx.font = `700 ${Math.min(115, h * 0.36)}px system-ui, sans-serif`;
     ctx.fillText(text, 512, sub ? h * 0.43 : h / 2, 930);
     if (sub) {
       ctx.font = `${Math.min(29, h * 0.13)}px monospace`;
@@ -126,7 +168,7 @@ function Sign({
       }}
     >
       <planeGeometry args={[width, height]} />
-      <meshBasicMaterial map={texture} side={THREE.DoubleSide} />
+      <meshBasicMaterial map={texture} side={THREE.DoubleSide} toneMapped={false} />
     </mesh>
   );
 }
@@ -145,12 +187,12 @@ function Burger({ position, scale = 1 }: { position: Vec; scale?: number }) {
       <Box
         position={[0, 0.33, 0]}
         size={[1.02, 0.04, 1.02]}
-        color="#f9bc31"
+        color={palette.gold}
         rotation={[0, 0.3, 0]}
       />
       <mesh position={[0, 0.4, 0]} castShadow>
         <cylinderGeometry args={[0.57, 0.58, 0.09, 32]} />
-        <meshStandardMaterial color="#b84229" />
+        <meshStandardMaterial color={palette.accent} />
       </mesh>
       <mesh position={[0, 0.47, 0]} castShadow>
         <cylinderGeometry args={[0.67, 0.62, 0.07, 12]} />
@@ -186,10 +228,10 @@ function Room({ onSelect }: { onSelect: (id: string) => void }) {
   const special = projects.find((p) => p.id === featuredProjectId)!;
   return (
     <>
-      <color attach="background" args={["#edf3fa"]} />
-      <fog attach="fog" args={["#edf3fa", 20, 35]} />
+      <color attach="background" args={[palette.sky]} />
+      <fog attach="fog" args={[palette.sky, 20, 35]} />
       <ambientLight intensity={0.8} />
-      <hemisphereLight args={["#ffffff", "#a1a7af", 1.35]} />
+      <hemisphereLight args={[palette.white, palette.steel, 1.35]} />
       <directionalLight
         position={[2, 9, 6]}
         intensity={2.1}
@@ -211,7 +253,7 @@ function Room({ onSelect }: { onSelect: (id: string) => void }) {
                 key={`${x}-${z}`}
                 position={[x - 7.5, -0.009, z - 9.5]}
                 size={[0.98, 0.02, 0.98]}
-                color="#9ba2a9"
+                color={palette.tile}
               />
             ),
         ),
@@ -241,12 +283,12 @@ function Room({ onSelect }: { onSelect: (id: string) => void }) {
           />
           <mesh position={[0, 3.09, 2]} rotation={[0, Math.PI / 2, 0]}>
             <planeGeometry args={[14, 2.5]} />
-            <meshBasicMaterial color="#a9d7f0" side={THREE.DoubleSide} />
+            <meshBasicMaterial color={palette.sky} side={THREE.DoubleSide} />
           </mesh>
           <Box
             position={[side * -0.02, 2.04, 2]}
             size={[0.14, 0.23, 14]}
-            color="#bacbc8"
+            color={CHROME}
           />
           {[-4.9, -1.5, 1.95, 5.4, 8.9].map((z) => (
             <Box
@@ -281,9 +323,9 @@ function Room({ onSelect }: { onSelect: (id: string) => void }) {
         width={7.8}
         height={1.3}
         color={DINER_RED}
-        ink="#fff8e7"
+        ink={palette.white}
       />
-      <Box position={[0, 1, -2.4]} size={[10.6, 2, 1.5]} color={DINER_WHITE} />
+      <Box position={[0, 1, -2.4]} size={[10.6, 2, 1.5]} color={palette.ink} />
       <Box
         position={[0, 2.05, -2.35]}
         size={[11, 0.16, 1.9]}
@@ -306,7 +348,7 @@ function Room({ onSelect }: { onSelect: (id: string) => void }) {
           key={i}
           position={[-5 + i * 0.5, 1, -1.63]}
           size={[0.025, 1.7, 0.025]}
-          color="#dadde0"
+          color={palette.muted}
         />
       ))}
       <Sign
@@ -315,8 +357,8 @@ function Room({ onSelect }: { onSelect: (id: string) => void }) {
         position={[0, 1.15, -1.61]}
         width={3.2}
         height={0.85}
-        color={DINER_WHITE}
-        ink={DINER_RED}
+        color={palette.ink}
+        ink={palette.white}
       />
       {projects.map((p, i) => (
         <group key={p.id}>
@@ -337,8 +379,8 @@ function Room({ onSelect }: { onSelect: (id: string) => void }) {
             position={[-4.05 + i * 2.7, 3.65, -4.68]}
             width={2.3}
             height={1.75}
-            color="#fffdf6"
-            ink="#a71926"
+            color={palette.white}
+            ink={palette.accent}
             onClick={() => onSelect(p.id)}
           />
         </group>
@@ -346,7 +388,7 @@ function Room({ onSelect }: { onSelect: (id: string) => void }) {
       <Burger position={[-2.9, 2.14, -2.1]} scale={1.15} />
       <mesh position={[-2.9, 2.15, -2.1]}>
         <cylinderGeometry args={[0.95, 0.95, 0.07, 40]} />
-        <meshStandardMaterial color="#eee5d4" />
+        <meshStandardMaterial color={palette.white} />
       </mesh>
       <Sign
         text="HOUSE SPECIAL"
@@ -359,7 +401,7 @@ function Room({ onSelect }: { onSelect: (id: string) => void }) {
       <Box
         position={[2.9, 2.4, -2.25]}
         size={[0.95, 0.5, 0.7]}
-        color="#34473e"
+        color={palette.ink}
       />
       <Sign
         text="HELLO!"
@@ -367,8 +409,8 @@ function Room({ onSelect }: { onSelect: (id: string) => void }) {
         position={[2.9, 2.62, -1.88]}
         width={0.85}
         height={0.48}
-        color="#233a30"
-        ink="#d2e3a6"
+        color={palette.ink}
+        ink={palette.gold}
       />
       {LEFT_BOOTHS.map((z) => (
         <group key={z} position={[-5.6, 0, z]}>
@@ -439,7 +481,7 @@ function Room({ onSelect }: { onSelect: (id: string) => void }) {
             </mesh>
             <mesh position={[x, 4.98, -1]} scale={[1, 0.75, 1]}>
               <sphereGeometry args={[0.36, 18, 12]} />
-              <meshBasicMaterial color="#fff9e9" />
+              <meshBasicMaterial color={palette.white} />
             </mesh>
           </group>
         )),
@@ -450,8 +492,8 @@ function Room({ onSelect }: { onSelect: (id: string) => void }) {
         position={[-6.5, 3.5, -4.8]}
         width={1}
         height={1.7}
-        color="#bc4c32"
-        ink="#fff1d2"
+        color={palette.ink}
+        ink={palette.white}
       />
       <Sign
         text="EST. 2026"
@@ -486,6 +528,7 @@ function Walk({
       avatar.rotation.y = 0;
       stride.current = 0;
       Object.assign(c, { yaw: 0, pitch: -0.04, reset: false });
+      stopOrbit(c);
     }
     const forward = !active
       ? 0
@@ -496,6 +539,21 @@ function Walk({
       : Number(c.keys.has("d") || c.keys.has("ArrowRight")) -
         Number(c.keys.has("a") || c.keys.has("ArrowLeft"));
     const dt = Math.min(delta, 0.05);
+    if (active && !c.reducedMotion && (c.yawVelocity || c.pitchVelocity)) {
+      const decay = Math.exp(-ORBIT_FRICTION * dt);
+      const travel = (1 - decay) / ORBIT_FRICTION;
+      const pitch = c.pitch + c.pitchVelocity * travel;
+      const boundedPitch = pitchWithinRoom(pitch);
+      Object.assign(c, {
+        yaw: c.yaw + c.yawVelocity * travel,
+        pitch: boundedPitch,
+        yawVelocity: Math.abs(c.yawVelocity) < 0.01 ? 0 : c.yawVelocity * decay,
+        pitchVelocity:
+          pitch !== boundedPitch || Math.abs(c.pitchVelocity) < 0.01
+            ? 0
+            : c.pitchVelocity * decay,
+      });
+    }
     const speed = (dt * 3.3) / Math.max(1, Math.hypot(forward, side));
     const sin = Math.sin(c.yaw);
     const cos = Math.cos(c.yaw);
@@ -510,10 +568,12 @@ function Walk({
       const heading = Math.atan2(-dx, -dz);
       const turn = heading - avatar.rotation.y;
       avatar.rotation.y +=
-        Math.atan2(Math.sin(turn), Math.cos(turn)) * (1 - Math.exp(-17 * dt));
+        Math.atan2(Math.sin(turn), Math.cos(turn)) *
+        (c.reducedMotion ? 1 : 1 - Math.exp(-17 * dt));
       stride.current += moved * 4.3;
     }
-    const swing = moved > 0.0001 ? Math.sin(stride.current) * 0.48 : 0;
+    const swing =
+      moved > 0.0001 && !c.reducedMotion ? Math.sin(stride.current) * 0.48 : 0;
     for (const [limb, direction] of [
       [leftArm, -1],
       [rightArm, 1],
@@ -543,8 +603,8 @@ function Walk({
     );
     camera.lookAt(px - sin * 0.65, 1.52 + c.pitch * 0.45, pz - cos * 0.65);
   });
-  const black = "#20242c";
-  const fur = "#f7f3e8";
+  const black = palette.ink;
+  const fur = palette.paper;
   return (
     <group ref={player} position={[0, 0, 4.9]}>
       <mesh position={[0, 0.91, 0]} scale={[0.37, 0.41, 0.23]} castShadow>
@@ -554,12 +614,12 @@ function Walk({
       <Box
         position={[0, 0.94, 0.225]}
         size={[0.24, 0.18, 0.025]}
-        color="#ffcf65"
+        color={palette.gold}
       />
       <Box
         position={[0, 0.94, 0.242]}
         size={[0.19, 0.026, 0.02]}
-        color="#8d281f"
+        color={palette.accent}
       />
       <mesh position={[0, 1.48, -0.025]} scale={[0.36, 0.31, 0.31]} castShadow>
         <sphereGeometry args={[1, 24, 16]} />
@@ -585,7 +645,7 @@ function Walk({
           </mesh>
           <mesh position={[side * 0.135, 1.51, -0.319]}>
             <sphereGeometry args={[0.019, 10, 8]} />
-            <meshBasicMaterial color="#ffffff" />
+            <meshBasicMaterial color={palette.white} />
           </mesh>
           <group
             ref={side < 0 ? leftArm : rightArm}
@@ -657,98 +717,175 @@ export default function Restaurant({
     keys: new Set(),
     yaw: 0,
     pitch: -0.04,
+    yawVelocity: 0,
+    pitchVelocity: 0,
+    reducedMotion: false,
     reset: true,
   });
-  const drag = useRef<{ x: number; y: number } | null>(null);
+  const drag = useRef<OrbitDrag | null>(null);
   const [active, setActive] = useState(false);
   const [ready, setReady] = useState(false);
   const [visible, setVisible] = useState(true);
   const invalidate = useRef<(() => void) | null>(null);
   const room = useRef<HTMLDivElement>(null);
+  const cancelInteraction = useCallback(() => {
+    const current = drag.current;
+    drag.current = null;
+    if (current && room.current?.hasPointerCapture(current.pointerId)) {
+      room.current.releasePointerCapture(current.pointerId);
+    }
+    controls.current.keys.clear();
+    stopOrbit(controls.current);
+  }, []);
+
+  useEffect(() => {
+    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    function updateMotion() {
+      controls.current.reducedMotion = preference.matches;
+      if (preference.matches) stopOrbit(controls.current);
+    }
+    updateMotion();
+    preference.addEventListener("change", updateMotion);
+    return () => preference.removeEventListener("change", updateMotion);
+  }, []);
+
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
       setVisible(entry.isIntersecting);
-      if (!entry.isIntersecting) controls.current.keys.clear();
+      if (!entry.isIntersecting) cancelInteraction();
     });
     if (room.current) observer.observe(room.current);
     return () => observer.disconnect();
-  }, []);
+  }, [cancelInteraction]);
   useEffect(() => {
     function key(e: KeyboardEvent) {
       if (!active || !room.current?.contains(document.activeElement)) return;
-      if (
-        [
-          "w",
-          "a",
-          "s",
-          "d",
-          "ArrowUp",
-          "ArrowDown",
-          "ArrowLeft",
-          "ArrowRight",
-        ].includes(e.key)
-      ) {
+      const direction = moveKey(e.key);
+      if (!e.metaKey && !e.ctrlKey && !e.altKey && PRESS_KEYS.has(direction)) {
         e.preventDefault();
-        controls.current.keys.add(e.key);
+        controls.current.keys.add(direction);
       }
       if (e.key === "Escape") {
         setActive(false);
-        controls.current.keys.clear();
+        cancelInteraction();
       }
     }
     function up(e: KeyboardEvent) {
-      controls.current.keys.delete(e.key);
-    }
-    function clear() {
-      controls.current.keys.clear();
-      drag.current = null;
+      controls.current.keys.delete(moveKey(e.key));
     }
     window.addEventListener("keydown", key);
     window.addEventListener("keyup", up);
-    window.addEventListener("blur", clear);
+    window.addEventListener("blur", cancelInteraction);
     return () => {
       window.removeEventListener("keydown", key);
       window.removeEventListener("keyup", up);
-      window.removeEventListener("blur", clear);
+      window.removeEventListener("blur", cancelInteraction);
       document.body.style.cursor = "";
     };
-  }, [active]);
+  }, [active, cancelInteraction]);
+
+  function orbitStart(e: ReactPointerEvent<HTMLDivElement>) {
+    if (
+      !active ||
+      e.button !== 0 ||
+      drag.current ||
+      !(e.target instanceof HTMLCanvasElement)
+    )
+      return;
+    room.current?.focus({ preventScroll: true });
+    stopOrbit(controls.current);
+    const sample = { x: e.clientX, y: e.clientY, time: e.timeStamp };
+    drag.current = {
+      pointerId: e.pointerId,
+      start: sample,
+      last: sample,
+      samples: [sample],
+      tracking: false,
+    };
+  }
+
+  function orbitMove(e: ReactPointerEvent<HTMLDivElement>) {
+    const current = drag.current;
+    if (!current || !active || e.pointerId !== current.pointerId) return;
+    const sample = { x: e.clientX, y: e.clientY, time: e.timeStamp };
+    if (!current.tracking) {
+      if (
+        Math.hypot(sample.x - current.start.x, sample.y - current.start.y) <
+        ORBIT_THRESHOLD
+      )
+        return;
+      // Leave taps on the canvas for raycasting; capture only once an orbit is clear.
+      e.currentTarget.setPointerCapture(e.pointerId);
+      current.tracking = true;
+    }
+    const c = controls.current;
+    c.yaw -= (sample.x - current.last.x) * YAW_PER_PIXEL;
+    c.pitch = pitchWithinRoom(
+      c.pitch - (sample.y - current.last.y) * PITCH_PER_PIXEL,
+    );
+    current.last = sample;
+    current.samples = current.samples
+      .filter((point) => sample.time - point.time <= 90)
+      .slice(-5);
+    current.samples.push(sample);
+  }
+
+  function orbitEnd(e: ReactPointerEvent<HTMLDivElement>) {
+    const current = drag.current;
+    if (!current || current.pointerId !== e.pointerId) return;
+    drag.current = null;
+    const c = controls.current;
+    const first = current.samples[0];
+    const elapsed = (current.last.time - first.time) / 1000;
+    if (
+      current.tracking &&
+      !c.reducedMotion &&
+      e.timeStamp - current.last.time < 75 &&
+      elapsed > 0.008
+    ) {
+      // Handoff from the recent gesture, capped so a quick flick stays restrained.
+      c.yawVelocity = THREE.MathUtils.clamp(
+        (-(current.last.x - first.x) * YAW_PER_PIXEL) / elapsed,
+        -1.45,
+        1.45,
+      );
+      c.pitchVelocity = THREE.MathUtils.clamp(
+        (-(current.last.y - first.y) * PITCH_PER_PIXEL) / elapsed,
+        -0.85,
+        0.85,
+      );
+    }
+    if (e.currentTarget.hasPointerCapture(e.pointerId))
+      e.currentTarget.releasePointerCapture(e.pointerId);
+  }
+
   return (
     <div
       className="room"
+      data-active={active}
       ref={room}
       tabIndex={0}
       aria-label="Third-person diner. Enter to explore, use WASD or arrow keys to walk, drag to orbit the camera. Escape pauses."
       onBlur={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget)) {
-          controls.current.keys.clear();
-          drag.current = null;
+          cancelInteraction();
         }
       }}
-      onPointerDown={(e) => {
-        if (!active || (e.target as HTMLElement).tagName !== "CANVAS") return;
-        room.current?.focus({ preventScroll: true });
-        drag.current = { x: e.clientX, y: e.clientY };
+      onPointerDown={orbitStart}
+      onPointerMove={orbitMove}
+      onPointerUp={orbitEnd}
+      onPointerLeave={(e) => {
+        if (
+          drag.current?.pointerId === e.pointerId &&
+          !e.currentTarget.hasPointerCapture(e.pointerId)
+        )
+          cancelInteraction();
       }}
-      onPointerMove={(e) => {
-        if (!drag.current || !active) return;
-        controls.current.yaw -= (e.clientX - drag.current.x) * 0.004;
-        controls.current.pitch = THREE.MathUtils.clamp(
-          controls.current.pitch - (e.clientY - drag.current.y) * 0.003,
-          -0.55,
-          0.5,
-        );
-        drag.current = { x: e.clientX, y: e.clientY };
+      onPointerCancel={(e) => {
+        if (drag.current?.pointerId === e.pointerId) cancelInteraction();
       }}
-      onPointerUp={() => {
-        drag.current = null;
-      }}
-      onPointerLeave={() => {
-        drag.current = null;
-      }}
-      onPointerCancel={() => {
-        drag.current = null;
-        controls.current.keys.clear();
+      onLostPointerCapture={(e) => {
+        if (drag.current?.pointerId === e.pointerId) cancelInteraction();
       }}
     >
       <SceneBoundary>
@@ -802,7 +939,7 @@ export default function Restaurant({
           <button
             onClick={() => {
               setActive(!active);
-              controls.current.keys.clear();
+              cancelInteraction();
               room.current?.focus({ preventScroll: true });
             }}
           >
@@ -813,7 +950,7 @@ export default function Restaurant({
             className="reset-view"
             onClick={() => {
               controls.current.reset = true;
-              controls.current.keys.clear();
+              cancelInteraction();
               invalidate.current?.();
             }}
           >

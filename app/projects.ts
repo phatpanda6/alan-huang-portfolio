@@ -9,6 +9,7 @@ export type Project = {
   source: string;
   live?: string;
   status: string;
+  evidence: { label: string; detail: string };
   highlights: string[];
   note: string;
   color: string;
@@ -29,6 +30,11 @@ export const projects: Project[] = [
     source: "https://github.com/phatpanda6/contractlens",
     live: "https://contractlens-iota.vercel.app/",
     status: "Live demo",
+    evidence: {
+      label: "Verified workflow",
+      detail:
+        "A Playwright test with isolated PostgreSQL verifies PASS → FAIL → accept a new baseline → PASS, with the earlier failure preserved.",
+    },
     highlights: [
       "Deterministic schema comparison identifies missing fields and type changes.",
       "Explicit baseline acceptance preserves the history of earlier failed checks.",
@@ -49,6 +55,11 @@ export const projects: Project[] = [
     source: "https://github.com/phatpanda6/airtable-clone",
     live: "https://airtable-clone-chi-nine.vercel.app/",
     status: "Project",
+    evidence: {
+      label: "Flexible data model",
+      detail:
+        "A tRPC cell edit validates the value and merges it into the existing JSON row, preserving the values in other columns.",
+    },
     highlights: [
       "Relational data presented as an editable workspace.",
       "Type-safe communication between the interface and API.",
@@ -68,6 +79,11 @@ export const projects: Project[] = [
     stack: ["PHP", "SQLite", "PDO", "HTTP", "EC2 lab"],
     source: "https://github.com/phatpanda6/php-announcements-api",
     status: "Source available",
+    evidence: {
+      label: "Validation and persistence",
+      detail:
+        "Separates malformed JSON (400) from invalid input (422), with automated validation and repository checks using in-memory SQLite for persistence tests.",
+    },
     highlights: [
       "Separates request validation from persistence through a PDO repository.",
       "Uses prepared statements and distinguishes malformed JSON from invalid fields.",
@@ -88,6 +104,11 @@ export const projects: Project[] = [
     source: "https://github.com/phatpanda6/NBA-Player-Hub",
     live: "https://nba-player-hub.vercel.app/",
     status: "Project",
+    evidence: {
+      label: "Resilient search",
+      detail:
+        "The interface handles no-match responses separately from rate limiting and prevents repeat submissions while a request is in flight.",
+    },
     highlights: [
       "Searches player information through a third-party API.",
       "Explicit loading, empty and rate-limit states.",

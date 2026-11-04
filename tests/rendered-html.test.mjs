@@ -14,12 +14,12 @@ async function render() {
 test("prerenders Alan Huang's portfolio", async () => {
   const html = await render();
   assert.match(html, /<title>Alan Huang \| Full-Stack Developer<\/title>/i);
-  assert.match(html, /Good software/);
+  assert.match(html, /Software that<br\s*\/?><em>holds up\./);
   assert.match(html, /ContractLens/);
   assert.match(html, /PHP Announcements API/);
   assert.match(html, /Relational Workspace/);
   assert.match(html, /NBA Player Hub/);
-  assert.match(html, /mailto:ahuang24365@gmail\.com/);
+  assert.match(html, /mailto:alan\.huang5@gmail\.com/);
   assert.match(html, /Skip to content/);
   assert.match(
     html,
@@ -38,6 +38,9 @@ test("exposes project evidence without requiring the 3D scene", async () => {
   assert.match(html, /id="menu"/);
   assert.match(html, /id="about"/);
   assert.match(html, /SQLite/);
+  assert.match(html, /Verified workflow/);
+  assert.match(html, /Validation and persistence/);
+  assert.match(html, /id="diner"/);
 });
 
 test("removes starter assets and keeps accessibility safeguards", async () => {
