@@ -21,21 +21,40 @@ type Controls = {
   reset: boolean;
 };
 
+const DINER_RED = "#c4202e";
+const DINER_WHITE = "#f6f4ed";
+const CHROME = "#a9b1bc";
+const LEFT_BOOTHS = [1.7, 4.8];
+const RIGHT_BOOTHS = [0.4, 3.7];
+
+function canWalk(x: number, z: number) {
+  if (x < -6.6 || x > 6.6 || z < -1.1 || z > 7.8) return false;
+  if (x < -3.4 && LEFT_BOOTHS.some((row) => Math.abs(z - row) < 1.35))
+    return false;
+  return !(x > 3.5 && RIGHT_BOOTHS.some((row) => Math.abs(z - row) < 1.2));
+}
+
 function Box({
   position,
   size,
   color,
   rotation = [0, 0, 0],
+  metal = false,
 }: {
   position: Vec;
   size: Vec;
   color: string;
   rotation?: Vec;
+  metal?: boolean;
 }) {
   return (
     <mesh position={position} rotation={rotation} castShadow receiveShadow>
       <boxGeometry args={size} />
-      <meshStandardMaterial color={color} roughness={0.65} />
+      <meshStandardMaterial
+        color={color}
+        roughness={metal ? 0.27 : 0.65}
+        metalness={metal ? 0.45 : 0}
+      />
     </mesh>
   );
 }
@@ -73,7 +92,7 @@ function Sign({
     ctx.fillStyle = ink;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.font = `bold ${Math.min(90, h * 0.33)}px Georgia`;
+    ctx.font = `900 ${Math.min(115, h * 0.36)}px Arial`;
     ctx.fillText(text, 512, sub ? h * 0.43 : h / 2, 930);
     if (sub) {
       ctx.font = `${Math.min(29, h * 0.13)}px monospace`;
@@ -167,13 +186,13 @@ function Room({ onSelect }: { onSelect: (id: string) => void }) {
   const special = projects.find((p) => p.id === featuredProjectId)!;
   return (
     <>
-      <color attach="background" args={["#e2d5ba"]} />
-      <fog attach="fog" args={["#e2d5ba", 16, 32]} />
-      <ambientLight intensity={1.6} />
-      <hemisphereLight args={["#fff5de", "#8f7a5d", 1.8]} />
+      <color attach="background" args={["#edf3fa"]} />
+      <fog attach="fog" args={["#edf3fa", 20, 35]} />
+      <ambientLight intensity={0.8} />
+      <hemisphereLight args={["#ffffff", "#a1a7af", 1.35]} />
       <directionalLight
         position={[2, 9, 6]}
-        intensity={3}
+        intensity={2.1}
         castShadow
         shadow-mapSize={[1024, 1024]}
         shadow-camera-left={-9}
@@ -182,7 +201,7 @@ function Room({ onSelect }: { onSelect: (id: string) => void }) {
         shadow-camera-bottom={-9}
         shadow-bias={-0.001}
       />
-      <Box position={[0, -0.12, 0]} size={[16, 0.2, 20]} color="#e7d9b9" />
+      <Box position={[0, -0.12, 0]} size={[16, 0.2, 20]} color={DINER_WHITE} />
       {Array.from({ length: 16 }, (_, x) =>
         Array.from(
           { length: 20 },
@@ -192,32 +211,102 @@ function Room({ onSelect }: { onSelect: (id: string) => void }) {
                 key={`${x}-${z}`}
                 position={[x - 7.5, -0.009, z - 9.5]}
                 size={[0.98, 0.02, 0.98]}
-                color="#a9b19b"
+                color="#9ba2a9"
               />
             ),
         ),
       )}
-      <Box position={[0, 3.5, -5.1]} size={[16, 7, 0.3]} color="#f0dfbd" />
-      <Box position={[0, 0.75, -4.9]} size={[16, 1.5, 0.12]} color="#385b4b" />
-      <Box position={[-7.2, 3, 0]} size={[0.3, 6, 10]} color="#e9d8b6" />
-      <Box position={[7.2, 3, 0]} size={[0.3, 6, 10]} color="#e9d8b6" />
+      <Box position={[0, 3.5, -5.1]} size={[16, 7, 0.3]} color={DINER_WHITE} />
+      <Box
+        position={[0, 5.88, 2]}
+        size={[14.5, 0.18, 15]}
+        color={DINER_WHITE}
+      />
+      {[-1, 1].map((side) => (
+        <group key={side} position={[side * 7.05, 0, 0]}>
+          <Box
+            position={[0, 0.95, 2]}
+            size={[0.22, 1.9, 14]}
+            color={DINER_WHITE}
+          />
+          <Box
+            position={[0, 1.78, 2]}
+            size={[0.24, 0.22, 14]}
+            color={DINER_RED}
+          />
+          <Box
+            position={[0, 5.1, 2]}
+            size={[0.22, 1.65, 14]}
+            color={DINER_WHITE}
+          />
+          <mesh position={[0, 3.09, 2]} rotation={[0, Math.PI / 2, 0]}>
+            <planeGeometry args={[14, 2.5]} />
+            <meshBasicMaterial color="#a9d7f0" side={THREE.DoubleSide} />
+          </mesh>
+          <Box
+            position={[side * -0.02, 2.04, 2]}
+            size={[0.14, 0.23, 14]}
+            color="#bacbc8"
+          />
+          {[-4.9, -1.5, 1.95, 5.4, 8.9].map((z) => (
+            <Box
+              key={z}
+              position={[0, 3.14, z]}
+              size={[0.28, 2.65, 0.14]}
+              color={CHROME}
+              metal
+            />
+          ))}
+        </group>
+      ))}
+      <Box
+        position={[0, 2.5, 8.95]}
+        size={[14.2, 5, 0.18]}
+        color={DINER_WHITE}
+      />
+      <Box
+        position={[0, 1.95, 8.83]}
+        size={[14.2, 0.18, 0.11]}
+        color={DINER_RED}
+      />
+      <Box
+        position={[0, 2.83, -4.88]}
+        size={[14.4, 0.16, 0.14]}
+        color={DINER_RED}
+      />
       <Sign
         text="STACK HOUSE"
         sub="GOOD TASTE. FULL STACK."
         position={[0, 5.25, -4.85]}
         width={7.8}
         height={1.3}
-        color="#294638"
-        ink="#f6dfaf"
+        color={DINER_RED}
+        ink="#fff8e7"
       />
-      <Box position={[0, 1, -2.4]} size={[10.6, 2, 1.5]} color="#b54b32" />
-      <Box position={[0, 2.05, -2.35]} size={[11, 0.16, 1.9]} color="#f2deb9" />
+      <Box position={[0, 1, -2.4]} size={[10.6, 2, 1.5]} color={DINER_WHITE} />
+      <Box
+        position={[0, 2.05, -2.35]}
+        size={[11, 0.16, 1.9]}
+        color={CHROME}
+        metal
+      />
+      <Box
+        position={[0, 1.69, -1.634]}
+        size={[10.61, 0.28, 0.05]}
+        color={DINER_RED}
+      />
+      <Box
+        position={[0, 0.18, -1.62]}
+        size={[10.61, 0.14, 0.05]}
+        color={CHROME}
+        metal
+      />
       {Array.from({ length: 21 }, (_, i) => (
         <Box
           key={i}
           position={[-5 + i * 0.5, 1, -1.63]}
           size={[0.025, 1.7, 0.025]}
-          color="#da8060"
+          color="#dadde0"
         />
       ))}
       <Sign
@@ -226,15 +315,15 @@ function Room({ onSelect }: { onSelect: (id: string) => void }) {
         position={[0, 1.15, -1.61]}
         width={3.2}
         height={0.85}
-        color="#b54b32"
-        ink="#fff0ce"
+        color={DINER_WHITE}
+        ink={DINER_RED}
       />
       {projects.map((p, i) => (
         <group key={p.id}>
           <Box
             position={[-4.05 + i * 2.7, 3.65, -4.78]}
             size={[2.5, 1.95, 0.15]}
-            color="#304b3e"
+            color={DINER_RED}
           />
           <Sign
             text={
@@ -248,7 +337,8 @@ function Room({ onSelect }: { onSelect: (id: string) => void }) {
             position={[-4.05 + i * 2.7, 3.65, -4.68]}
             width={2.3}
             height={1.75}
-            color="#f3e3bf"
+            color="#fffdf6"
+            ink="#a71926"
             onClick={() => onSelect(p.id)}
           />
         </group>
@@ -280,64 +370,80 @@ function Room({ onSelect }: { onSelect: (id: string) => void }) {
         color="#233a30"
         ink="#d2e3a6"
       />
-      {[1.7, 4.8].map((z) => (
+      {LEFT_BOOTHS.map((z) => (
         <group key={z} position={[-5.6, 0, z]}>
-          <Box position={[0, 0.55, 0]} size={[1.7, 1.1, 2.1]} color="#b94930" />
+          <Box
+            position={[0, 0.55, 0]}
+            size={[1.7, 1.1, 2.1]}
+            color={DINER_RED}
+          />
           <Box
             position={[-0.65, 1.3, 0]}
             size={[0.35, 1.6, 2.1]}
-            color="#b94930"
+            color={DINER_RED}
           />
           <Box
             position={[1.1, 1.25, 0]}
             size={[1.6, 0.12, 1.6]}
-            color="#e8c887"
+            color={DINER_WHITE}
           />
           <Box
             position={[1.1, 0.6, 0]}
             size={[0.15, 1.2, 0.15]}
-            color="#304b3e"
+            color={CHROME}
+            metal
           />
           <Burger position={[1.1, 1.32, 0]} scale={0.42} />
         </group>
       ))}
-      {[0.4, 3.7].map((z) => (
+      {RIGHT_BOOTHS.map((z) => (
         <group key={z} position={[5.5, 0, z]}>
-          <Box position={[0, 0.55, 0]} size={[1.5, 1.1, 1.8]} color="#b94930" />
+          <Box
+            position={[0, 0.55, 0]}
+            size={[1.5, 1.1, 1.8]}
+            color={DINER_RED}
+          />
           <Box
             position={[0.6, 1.3, 0]}
             size={[0.35, 1.6, 1.8]}
-            color="#b94930"
+            color={DINER_RED}
           />
           <Box
             position={[-1, 1.25, 0]}
             size={[1.4, 0.12, 1.4]}
-            color="#e8c887"
+            color={DINER_WHITE}
           />
           <Box
             position={[-1, 0.6, 0]}
             size={[0.15, 1.2, 0.15]}
-            color="#304b3e"
+            color={CHROME}
+            metal
           />
         </group>
       ))}
-      {[-3.4, 0, 3.4].map((x) => (
-        <group key={x}>
-          <Box
-            position={[x, 5.8, -1]}
-            size={[0.025, 1.9, 0.025]}
-            color="#333e32"
-          />
-          <mesh position={[x, 4.85, -1]}>
-            <coneGeometry args={[0.55, 0.4, 32, 1, true]} />
-            <meshStandardMaterial color="#d3a14c" side={THREE.DoubleSide} />
-          </mesh>
-          <mesh position={[x, 4.69, -1]}>
-            <sphereGeometry args={[0.12, 12, 8]} />
-            <meshBasicMaterial color="#fff1b5" />
-          </mesh>
-        </group>
-      ))}
+      {[-4.5, 0, 4.5].flatMap((x) =>
+        [0, 4.6].map((z) => (
+          <group key={`${x}:${z}`} position={[0, 0, z]}>
+            <Box
+              position={[x, 5.5, -1]}
+              size={[0.05, 0.6, 0.05]}
+              color={CHROME}
+            />
+            <mesh position={[x, 5.18, -1]}>
+              <cylinderGeometry args={[0.35, 0.41, 0.11, 24]} />
+              <meshStandardMaterial
+                color={CHROME}
+                metalness={0.4}
+                roughness={0.3}
+              />
+            </mesh>
+            <mesh position={[x, 4.98, -1]} scale={[1, 0.75, 1]}>
+              <sphereGeometry args={[0.36, 18, 12]} />
+              <meshBasicMaterial color="#fff9e9" />
+            </mesh>
+          </group>
+        )),
+      )}
       <Sign
         text="FRESH IDEAS"
         sub="MADE FROM SCRATCH"
@@ -365,37 +471,161 @@ function Walk({
   controls: RefObject<Controls>;
   active: boolean;
 }) {
+  const player = useRef<THREE.Group>(null);
+  const leftArm = useRef<THREE.Group>(null);
+  const rightArm = useRef<THREE.Group>(null);
+  const leftLeg = useRef<THREE.Group>(null);
+  const rightLeg = useRef<THREE.Group>(null);
+  const stride = useRef(0);
   useFrame(({ camera }, delta) => {
+    const avatar = player.current;
+    if (!avatar) return;
     const c = controls.current;
     if (c.reset) {
-      camera.position.set(0, 2.6, 8);
+      avatar.position.set(0, 0, 4.9);
+      avatar.rotation.y = 0;
+      stride.current = 0;
       Object.assign(c, { yaw: 0, pitch: -0.04, reset: false });
     }
-    camera.rotation.order = "YXZ";
-    camera.rotation.set(c.pitch, c.yaw, 0);
-    if (!active) return;
-    const forward =
-      Number(c.keys.has("w") || c.keys.has("ArrowUp")) -
-      Number(c.keys.has("s") || c.keys.has("ArrowDown"));
-    const side =
-      Number(c.keys.has("d") || c.keys.has("ArrowRight")) -
-      Number(c.keys.has("a") || c.keys.has("ArrowLeft"));
-    const speed =
-      (Math.min(delta, 0.05) * 3) / Math.max(1, Math.hypot(forward, side));
-    camera.position.x = THREE.MathUtils.clamp(
-      camera.position.x +
-        (side * Math.cos(c.yaw) - forward * Math.sin(c.yaw)) * speed,
-      -2.7,
-      2.7,
+    const forward = !active
+      ? 0
+      : Number(c.keys.has("w") || c.keys.has("ArrowUp")) -
+        Number(c.keys.has("s") || c.keys.has("ArrowDown"));
+    const side = !active
+      ? 0
+      : Number(c.keys.has("d") || c.keys.has("ArrowRight")) -
+        Number(c.keys.has("a") || c.keys.has("ArrowLeft"));
+    const dt = Math.min(delta, 0.05);
+    const speed = (dt * 3.3) / Math.max(1, Math.hypot(forward, side));
+    const sin = Math.sin(c.yaw);
+    const cos = Math.cos(c.yaw);
+    const dx = (side * cos - forward * sin) * speed;
+    const dz = (-forward * cos - side * sin) * speed;
+    const { x, z } = avatar.position;
+    // Resolve each axis separately so the player can slide alongside furniture.
+    if (canWalk(x + dx, z)) avatar.position.x += dx;
+    if (canWalk(avatar.position.x, z + dz)) avatar.position.z += dz;
+    const moved = Math.hypot(avatar.position.x - x, avatar.position.z - z);
+    if (moved > 0.0001) {
+      const heading = Math.atan2(-dx, -dz);
+      const turn = heading - avatar.rotation.y;
+      avatar.rotation.y +=
+        Math.atan2(Math.sin(turn), Math.cos(turn)) * (1 - Math.exp(-17 * dt));
+      stride.current += moved * 4.3;
+    }
+    const swing = moved > 0.0001 ? Math.sin(stride.current) * 0.48 : 0;
+    for (const [limb, direction] of [
+      [leftArm, -1],
+      [rightArm, 1],
+      [leftLeg, 1],
+      [rightLeg, -1],
+    ] as const) {
+      if (limb.current)
+        limb.current.rotation.x = THREE.MathUtils.damp(
+          limb.current.rotation.x,
+          swing * direction,
+          18,
+          dt,
+        );
+    }
+    // Keep the orbit inside the dining room, lifting it near a wall so the avatar stays visible.
+    const px = avatar.position.x;
+    const pz = avatar.position.z;
+    const ox = sin * 3.9;
+    const oz = cos * 3.9;
+    const cx = THREE.MathUtils.clamp(px + ox, -6.75, 6.75);
+    const cz = THREE.MathUtils.clamp(pz + oz, -1.32, 8.65);
+    const tight = 1 - Math.min(1, Math.hypot(cx - px, cz - pz) / 3.9);
+    camera.position.set(
+      cx,
+      Math.max(2.35, 2.85 + tight * 1.45 + c.pitch * 1.8),
+      cz,
     );
-    camera.position.z = THREE.MathUtils.clamp(
-      camera.position.z +
-        (-forward * Math.cos(c.yaw) - side * Math.sin(c.yaw)) * speed,
-      0.5,
-      8.5,
-    );
+    camera.lookAt(px - sin * 0.65, 1.52 + c.pitch * 0.45, pz - cos * 0.65);
   });
-  return null;
+  const black = "#20242c";
+  const fur = "#f7f3e8";
+  return (
+    <group ref={player} position={[0, 0, 4.9]}>
+      <mesh position={[0, 0.91, 0]} scale={[0.37, 0.41, 0.23]} castShadow>
+        <sphereGeometry args={[1, 20, 14]} />
+        <meshStandardMaterial color={DINER_RED} />
+      </mesh>
+      <Box
+        position={[0, 0.94, 0.225]}
+        size={[0.24, 0.18, 0.025]}
+        color="#ffcf65"
+      />
+      <Box
+        position={[0, 0.94, 0.242]}
+        size={[0.19, 0.026, 0.02]}
+        color="#8d281f"
+      />
+      <mesh position={[0, 1.48, -0.025]} scale={[0.36, 0.31, 0.31]} castShadow>
+        <sphereGeometry args={[1, 24, 16]} />
+        <meshStandardMaterial color={fur} />
+      </mesh>
+      {[-1, 1].map((side) => (
+        <group key={side}>
+          <mesh
+            position={[side * 0.25, 1.7, -0.045]}
+            scale={[0.13, 0.13, 0.095]}
+            castShadow
+          >
+            <sphereGeometry args={[1, 14, 10]} />
+            <meshStandardMaterial color={black} />
+          </mesh>
+          <mesh
+            position={[side * 0.135, 1.49, -0.28]}
+            rotation={[0, side * -0.25, side * 0.25]}
+            scale={[0.084, 0.106, 0.04]}
+          >
+            <sphereGeometry args={[1, 16, 10]} />
+            <meshStandardMaterial color={black} />
+          </mesh>
+          <mesh position={[side * 0.135, 1.51, -0.319]}>
+            <sphereGeometry args={[0.019, 10, 8]} />
+            <meshBasicMaterial color="#ffffff" />
+          </mesh>
+          <group
+            ref={side < 0 ? leftArm : rightArm}
+            position={[side * 0.36, 1.11, 0]}
+            rotation={[0, 0, side * 0.09]}
+          >
+            <mesh position={[0, -0.19, 0]} castShadow>
+              <capsuleGeometry args={[0.107, 0.27, 5, 12]} />
+              <meshStandardMaterial color={fur} />
+            </mesh>
+            <mesh position={[0, -0.39, 0]} castShadow>
+              <sphereGeometry args={[0.099, 12, 8]} />
+              <meshStandardMaterial color={black} />
+            </mesh>
+          </group>
+          <group
+            ref={side < 0 ? leftLeg : rightLeg}
+            position={[side * 0.17, 0.61, 0]}
+          >
+            <mesh position={[0, -0.22, 0]} castShadow>
+              <capsuleGeometry args={[0.115, 0.32, 5, 12]} />
+              <meshStandardMaterial color={black} />
+            </mesh>
+            <mesh
+              position={[0, -0.49, -0.07]}
+              scale={[0.13, 0.105, 0.21]}
+              castShadow
+            >
+              <sphereGeometry args={[1, 14, 10]} />
+              <meshStandardMaterial color={DINER_RED} />
+            </mesh>
+          </group>
+        </group>
+      ))}
+      <mesh position={[0, 1.405, -0.318]} scale={[0.065, 0.042, 0.044]}>
+        <sphereGeometry args={[1, 14, 10]} />
+        <meshStandardMaterial color={black} />
+      </mesh>
+    </group>
+  );
 }
 
 class SceneBoundary extends Component<
@@ -488,7 +718,7 @@ export default function Restaurant({
       className="room"
       ref={room}
       tabIndex={0}
-      aria-label="Interactive restaurant. Enter to explore, use WASD or arrow keys to walk, drag to look. Escape stops walking."
+      aria-label="Third-person diner. Enter to explore, use WASD or arrow keys to walk, drag to orbit the camera. Escape pauses."
       onBlur={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget)) {
           controls.current.keys.clear();
@@ -526,7 +756,7 @@ export default function Restaurant({
           shadows
           frameloop={active && visible ? "always" : "demand"}
           dpr={[1, 1.5]}
-          camera={{ position: [0, 2.6, 8], fov: 58 }}
+          camera={{ position: [0, 2.8, 8.65], fov: 59 }}
           onCreated={(state) => {
             invalidate.current = state.invalidate;
             setReady(true);
@@ -594,7 +824,7 @@ export default function Restaurant({
       {active && (
         <>
           <div className="walk-help">
-            WASD / arrows to walk · Drag to look · Click a menu board · Esc to
+            WASD / arrows to walk · Drag to orbit · Click a menu board · Esc to
             pause
           </div>
           <div className="touch-controls" aria-label="Walking controls">

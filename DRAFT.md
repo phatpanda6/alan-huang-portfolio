@@ -6,7 +6,7 @@ A playable restaurant portfolio for Alan Huang. Developed on `feature/stack-hous
 
 Run `npm install` then `npm run dev`. Open the printed local address.
 
-Select **Enter the restaurant**, then use WASD or arrow keys to walk along the aisle. Drag the scene to look around. Click a project menu board to open its details. Touch direction buttons are available at narrow widths. Escape pauses walking or closes an open project dialog. **Reset view** returns to the entrance.
+Select **Enter the restaurant**, then use WASD or arrow keys to walk the panda around the diner. Drag to orbit the third-person camera. The booths and counter block movement so the panda stays in the dining area. Click a project menu board to open its details. Touch direction buttons are available at narrow widths. Escape pauses walking or closes an open project dialog. **Reset view** returns the panda and camera to the entrance.
 
 The project menu below the room is usable without WebGL. **Hide 3D / less motion** removes the scene. The camera has no automatic motion. The renderer pauses when idle or offscreen.
 
