@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { palette } from "./theme";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,14 +14,13 @@ const geistMono = Geist_Mono({
 });
 
 const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  "https://alan-huang-portfolio.vercel.app";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://alan-huang-portfolio.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: "Alan Huang | Full-Stack Developer",
   description:
-    "Australia-based full-stack developer building reliable TypeScript products with React, Next.js, APIs and PostgreSQL. Currently building ContractLens.",
+    "Step inside Alan’s Stack House. Explore Alan Huang’s work across interfaces, APIs and databases, from ContractLens to PHP and SQLite.",
   keywords: [
     "Alan Huang",
     "full-stack developer",
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     url: "/",
     title: "Alan Huang | Full-Stack Developer",
     description:
-      "Full-stack developer building ContractLens to detect breaking API changes before they reach users.",
+      "Alan Huang’s interactive portfolio: thoughtful interfaces, reliable APIs, and care at every layer.",
     siteName: "Alan Huang",
     images: [
       {
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Alan Huang | Full-Stack Developer",
     description:
-      "Full-stack developer building ContractLens to detect breaking API changes before they reach users.",
+      "Alan Huang’s interactive portfolio: thoughtful interfaces, reliable APIs, and care at every layer.",
     images: ["/og.png"],
   },
   icons: {
@@ -66,8 +66,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  colorScheme: "dark",
-  themeColor: "#080a0c",
+  colorScheme: "light",
+  themeColor: palette.paper,
 };
 
 export default function RootLayout({

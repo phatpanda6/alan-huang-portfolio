@@ -14,12 +14,12 @@ async function render() {
 test("prerenders Alan Huang's portfolio", async () => {
   const html = await render();
   assert.match(html, /<title>Alan Huang \| Full-Stack Developer<\/title>/i);
-  assert.match(html, /I build software that makes invisible failures/);
+  assert.match(html, /Software that<br\s*\/?><em>holds up\./);
   assert.match(html, /ContractLens/);
-  assert.match(html, /Automated testing/);
+  assert.match(html, /PHP Announcements API/);
   assert.match(html, /Relational Workspace/);
   assert.match(html, /NBA Player Hub/);
-  assert.match(html, /mailto:ahuang24365@gmail\.com/);
+  assert.match(html, /mailto:alan\.huang5@gmail\.com/);
   assert.match(html, /Skip to content/);
   assert.match(
     html,
@@ -28,29 +28,38 @@ test("prerenders Alan Huang's portfolio", async () => {
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape/);
 });
 
-test("makes the live ContractLens demo discoverable and keeps progress current", async () => {
+test("exposes project evidence without requiring the 3D scene", async () => {
   const html = await render();
-  const hero = html.match(/<section class="hero"[\s\S]*?<\/section>/)?.[0];
-  assert.ok(hero, "Hero section is rendered");
-  assert.match(hero, /href="https:\/\/contractlens-iota\.vercel\.app\/"/);
-  assert.match(hero, /Try ContractLens live/);
-  assert.match(html, /Open ContractLens demo/);
-  assert.match(html, /shared between visitors/);
-  assert.match(html, /GitHub Actions and Playwright with PostgreSQL/);
-  assert.doesNotMatch(html, /Recruiter-ready public demo|Safe browser workflow/);
+  assert.match(html, /href="https:\/\/contractlens-iota\.vercel\.app\/"/);
+  assert.match(
+    html,
+    /href="https:\/\/github.com\/phatpanda6\/php-announcements-api"/,
+  );
+  assert.match(html, /id="menu"/);
+  assert.match(html, /id="about"/);
+  assert.match(html, /SQLite/);
+  assert.match(html, /Verified workflow/);
+  assert.match(html, /Validation and persistence/);
+  assert.match(html, /id="diner"/);
 });
 
 test("removes starter assets and keeps accessibility safeguards", async () => {
   const [page, component, css, layout, packageJson] = await Promise.all([
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../app/components/DriftLens.tsx", import.meta.url), "utf8"),
+    readFile(
+      new URL("../app/components/StackHouse.tsx", import.meta.url),
+      "utf8",
+    ),
+    readFile(
+      new URL("../app/components/DriftLens.tsx", import.meta.url),
+      "utf8",
+    ),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
   ]);
 
   assert.match(page, /<main id="main-content">/);
-  assert.match(page, /aria-labelledby="contractlens-title"/);
+  assert.match(page, /aria-labelledby="menu-title"/);
   assert.match(component, /type="range"/);
   assert.match(component, /aria-valuetext/);
   assert.match(css, /:focus-visible/);
