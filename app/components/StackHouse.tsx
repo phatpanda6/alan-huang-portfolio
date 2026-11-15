@@ -340,14 +340,15 @@ export function StackHouse() {
                     >
                       Details <span aria-hidden="true">→</span>
                     </button>
-                    <a
-                      href={p.source}
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-label={`View ${p.title} source code`}
-                    >
-                      Source <Arrow />
-                    </a>
+                    {p.source ? (
+                      <a href={p.source} target="_blank" rel="noreferrer" aria-label={`View ${p.title} source code`}>
+                        Source <Arrow />
+                      </a>
+                    ) : p.live ? (
+                      <a href={p.live} target="_blank" rel="noreferrer" aria-label={`Try ${p.title} live`}>
+                        Live demo <Arrow />
+                      </a>
+                    ) : null}
                   </div>
                 </article>
               ))}
@@ -490,9 +491,11 @@ export function StackHouse() {
                   Open live project <Arrow />
                 </a>
               )}
-              <a href={selected.source} target="_blank" rel="noreferrer">
-                View source <Arrow />
-              </a>
+              {selected.source && (
+                <a href={selected.source} target="_blank" rel="noreferrer">
+                  View source <Arrow />
+                </a>
+              )}
               {selected.id === "contractlens" && (
                 <a href={walkthrough} target="_blank" rel="noreferrer">
                   Watch walkthrough <Arrow />

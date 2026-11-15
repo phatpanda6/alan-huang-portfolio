@@ -20,4 +20,4 @@ PHP Announcements API is described as a learning exercise with SQLite persistenc
 
 Run `npm run lint`, `npm run typecheck`, and `npm test` (production build plus rendered-page checks). Browser checks cover desktop/mobile rendering, movement, reset, board selection, dialogs, and source links.
 
-This is a local design draft, not a production deployment. The inherited Next.js 16.2.6 dependency has security advisories reported by npm audit; update the framework and affected dependencies before public deployment. Social preview artwork still uses the prior portfolio image. Real iOS Safari testing and broader keyboard/screen-reader review remain release follow-up work.
+Social preview artwork still uses the prior portfolio image. Real iOS Safari testing and broader keyboard/screen-reader review remain follow-up work.

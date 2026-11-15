@@ -6,7 +6,7 @@ export type Project = {
   tagline: string;
   description: string;
   stack: string[];
-  source: string;
+  source?: string;
   live?: string;
   status: string;
   evidence: { label: string; detail: string };
@@ -52,7 +52,6 @@ export const projects: Project[] = [
     description:
       "An Airtable-style workspace bringing a relational database and a type-safe API into a responsive interface.",
     stack: ["Next.js", "tRPC", "Prisma", "Tailwind"],
-    source: "https://github.com/phatpanda6/airtable-clone",
     live: "https://airtable-clone-chi-nine.vercel.app/",
     status: "Project",
     evidence: {

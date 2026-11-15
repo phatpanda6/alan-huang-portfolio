@@ -14,7 +14,7 @@ change affects an API contract check.
 ## Featured work
 
 - [ContractLens](https://github.com/phatpanda6/contractlens)
-- [Airtable Clone](https://github.com/phatpanda6/airtable-clone)
+- [Relational Workspace live demo](https://airtable-clone-chi-nine.vercel.app/)
 - [PHP Announcements API](https://github.com/phatpanda6/php-announcements-api)
 - [NBA Player Hub](https://github.com/phatpanda6/NBA-Player-Hub)
 
