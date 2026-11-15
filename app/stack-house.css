@@ -493,6 +493,21 @@
   color: var(--muted);
   font-size: 0.85rem;
 }
+.diner-notice {
+  margin-top: 0.75rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.8rem;
+  background: var(--white);
+  font-size: 0.9rem;
+}
+.diner-notice a {
+  display: inline-block;
+  margin-top: 0.3rem;
+  color: var(--accent);
+  font-weight: 650;
+  text-decoration: underline;
+}
 .room {
   position: relative;
   height: clamp(32rem, 49vw, 39rem);

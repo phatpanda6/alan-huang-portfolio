@@ -1,9 +1,16 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { featuredProjectId, projects, type Project } from "../projects";
 import { contactEmail, themeVars } from "../theme";
+import { canCreateWebGLContext } from "../webgl";
 
 const Restaurant = dynamic(() => import("./Restaurant"), {
   ssr: false,
@@ -213,7 +220,23 @@ function DinerIllustration() {
 
 export function StackHouse() {
   const [selected, setSelected] = useState<Project | null>(null);
-  const [showRoom, setShowRoom] = useState(false);
+  const [room, setRoom] = useState<
+    "poster" | "open" | "unsupported" | "failed"
+  >("poster");
+  const showRoom = room === "open";
+  const roomNotice =
+    room === "unsupported"
+      ? "3D is unavailable in this browser. Try opening the site in a browser with WebGL 2 enabled."
+      : room === "failed"
+        ? "The 3D diner stopped loading or lost graphics access. You can retry or browse the projects."
+        : null;
+  const dinerFrame = useRef<HTMLDivElement>(null);
+  const dinerButton = useRef<HTMLButtonElement>(null);
+  const handleRoomUnavailable = useCallback(() => {
+    if (dinerFrame.current?.contains(document.activeElement))
+      dinerButton.current?.focus();
+    setRoom("failed");
+  }, []);
   const dialog = useRef<HTMLDialogElement>(null);
   const feature =
     projects.find((p) => p.id === featuredProjectId) ?? projects[0];
@@ -341,11 +364,21 @@ export function StackHouse() {
                       Details <span aria-hidden="true">→</span>
                     </button>
                     {p.source ? (
-                      <a href={p.source} target="_blank" rel="noreferrer" aria-label={`View ${p.title} source code`}>
+                      <a
+                        href={p.source}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label={`View ${p.title} source code`}
+                      >
                         Source <Arrow />
                       </a>
                     ) : p.live ? (
-                      <a href={p.live} target="_blank" rel="noreferrer" aria-label={`Try ${p.title} live`}>
+                      <a
+                        href={p.live}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label={`Try ${p.title} live`}
+                      >
                         Live demo <Arrow />
                       </a>
                     ) : null}
@@ -370,9 +403,12 @@ export function StackHouse() {
               boards to explore the same projects.
             </p>
           </div>
-          <div className="experience-frame" id="diner-scene">
+          <div className="experience-frame" id="diner-scene" ref={dinerFrame}>
             {showRoom ? (
-              <Restaurant onSelect={select} />
+              <Restaurant
+                onSelect={select}
+                onUnavailable={handleRoomUnavailable}
+              />
             ) : (
               <div className="diner-poster">
                 <DinerIllustration />
@@ -382,15 +418,36 @@ export function StackHouse() {
               </div>
             )}
           </div>
+          {roomNotice && (
+            <div className="diner-notice">
+              <p role="status">{roomNotice}</p>
+              <a href="#menu">
+                Browse selected work <span aria-hidden="true">↑</span>
+              </a>
+            </div>
+          )}
           <div className="experience-bottom">
             <p>Optional experience · keyboard and touch controls</p>
             <button
+              ref={dinerButton}
               className={showRoom ? "secondary-button" : "house-button"}
               aria-expanded={showRoom}
               aria-controls="diner-scene"
-              onClick={() => setShowRoom(!showRoom)}
+              onClick={() =>
+                setRoom(
+                  showRoom
+                    ? "poster"
+                    : canCreateWebGLContext()
+                      ? "open"
+                      : "unsupported",
+                )
+              }
             >
-              {showRoom ? "Close 3D scene" : "Load the 3D diner"}{" "}
+              {showRoom
+                ? "Close 3D scene"
+                : roomNotice
+                  ? "Retry 3D"
+                  : "Load the 3D diner"}{" "}
               <span aria-hidden="true">{showRoom ? "×" : "→"}</span>
             </button>
           </div>
