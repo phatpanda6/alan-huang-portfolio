@@ -8,7 +8,12 @@ import {
   useState,
   type CSSProperties,
 } from "react";
-import { featuredProjectId, projects, type Project } from "../projects";
+import {
+  contribution,
+  featuredProjectId,
+  projects,
+  type Project,
+} from "../projects";
 import { contactEmail, themeVars } from "../theme";
 import { canCreateWebGLContext } from "../webgl";
 
@@ -59,6 +64,20 @@ function Evidence({ project }: { project: Project }) {
       <span className="tiny-label">{project.evidence.label}</span>
       <p>{project.evidence.detail}</p>
     </div>
+  );
+}
+
+function Stats({ project }: { project: Project }) {
+  if (!project.stats) return null;
+  return (
+    <dl className="project-stats">
+      {project.stats.map((stat) => (
+        <div key={stat.label}>
+          <dt>{stat.label}</dt>
+          <dd>{stat.value}</dd>
+        </div>
+      ))}
+    </dl>
   );
 }
 
@@ -278,8 +297,14 @@ export function StackHouse() {
             <em>holds up.</em>
           </h1>
           <p className="intro-description">
-            I build interfaces, APIs and the systems behind them. Based in
-            Australia, open to full-stack roles in Melbourne and Sydney.
+            I build tested TypeScript applications end to end. ContractLens, my
+            API change checker, is backed by 165 automated tests and CI, and
+            I’ve had a fix merged into an open-source React project.
+          </p>
+          <p className="intro-meta">
+            Melbourne <span aria-hidden="true">·</span> Australian citizen{" "}
+            <span aria-hidden="true">·</span> Open to full-stack roles in
+            Melbourne and Sydney
           </p>
           <div className="hero-actions">
             <a className="house-button" href="#menu">
@@ -316,6 +341,7 @@ export function StackHouse() {
               <h3>{feature.title}</h3>
               <p className="feature-description">{feature.description}</p>
               <Evidence project={feature} />
+              <Stats project={feature} />
               <Tags project={feature} />
               <div className="project-actions">
                 <button
@@ -386,6 +412,34 @@ export function StackHouse() {
                 </article>
               ))}
           </div>
+          <article className="contribution" id="open-source">
+            <div>
+              <p className="feature-label">
+                <i /> OPEN-SOURCE CONTRIBUTION <span> / Merged</span>
+              </p>
+              <h3>
+                {contribution.project} <span>PR {contribution.pull}</span>
+              </h3>
+              <p className="contribution-summary">{contribution.summary}</p>
+              <p>{contribution.detail}</p>
+              <ul
+                className="house-tags"
+                aria-label={`${contribution.project} technologies`}
+              >
+                {contribution.stack.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+            <a
+              className="secondary-button"
+              href={contribution.url}
+              target="_blank"
+              rel="noreferrer"
+            >
+              View merged PR <Arrow />
+            </a>
+          </article>
         </section>
 
         <section
@@ -530,6 +584,7 @@ export function StackHouse() {
             <p>{selected.description}</p>
             <Tags project={selected} />
             <Evidence project={selected} />
+            <Stats project={selected} />
             <h3>How it works</h3>
             <ul className="project-highlights">
               {selected.highlights.map((s) => (
