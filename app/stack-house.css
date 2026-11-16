@@ -589,6 +589,7 @@
   margin-top: clamp(4rem, 10vw, 7.75rem);
 }
 .experience-frame {
+  scroll-margin-bottom: 1.25rem;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   overflow: hidden;
@@ -599,10 +600,81 @@
   height: clamp(13rem, 32vw, 24rem);
   background: var(--sky);
 }
-.diner-illustration {
+.diner-still {
   width: 100%;
   height: 100%;
   display: block;
+  object-fit: cover;
+  object-position: 50% 45%;
+}
+.stack-house .hero-teaser {
+  position: relative;
+  display: block;
+  width: min(58rem, 100%);
+  margin: clamp(2rem, 5vw, 3rem) auto 0;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--sky);
+  aspect-ratio: 21 / 8;
+  box-shadow: 0 24px 60px #18181d1c;
+  text-align: left;
+  transition: transform 180ms ease-out, box-shadow 180ms ease-out;
+}
+.hero-teaser img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: 50% 30%;
+  transition: transform 400ms ease-out;
+}
+.stack-house .hero-teaser:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 30px 70px #18181d26;
+}
+.hero-teaser:hover img {
+  transform: scale(1.03);
+}
+.hero-teaser-label {
+  position: absolute;
+  inset: auto auto 0.9rem 0.9rem;
+  max-width: calc(100% - 1.8rem);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  padding: 0.75rem 0.9rem 0.75rem 1.1rem;
+  border-radius: 1rem;
+  background: var(--glass);
+  backdrop-filter: blur(14px) saturate(140%);
+  color: var(--ink);
+}
+.hero-teaser-label > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+.hero-teaser-label i {
+  width: 0.48rem;
+  height: 0.48rem;
+  border-radius: 50%;
+  background: var(--red);
+}
+.hero-teaser-label b {
+  border-radius: 999px;
+  padding: 0.55rem 0.95rem;
+  background: var(--accent);
+  color: var(--white);
+  font-size: 0.86rem;
+  font-weight: 650;
 }
 .poster-label {
   position: absolute;
@@ -892,6 +964,15 @@
   .special,
   .maker {
     grid-template-columns: 1fr;
+  }
+  .stack-house .hero-teaser {
+    aspect-ratio: 4 / 3;
+  }
+  .hero-teaser-label {
+    padding: 0.4rem;
+  }
+  .hero-teaser-label > span {
+    display: none;
   }
   .menu-item-wide {
     display: flex;

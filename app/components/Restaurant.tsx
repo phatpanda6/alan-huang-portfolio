@@ -44,6 +44,13 @@ const YAW_PER_PIXEL = 0.004;
 const PITCH_PER_PIXEL = 0.003;
 const ORBIT_FRICTION = 12;
 const ORBIT_THRESHOLD = 8;
+const SIGN_TEXTURE_SCALE = 2;
+/** Highest pixel ratio the scene renders at; sharp on retina screens. */
+const MAX_DPR = 2;
+/** Lowest pixel ratio adaptive quality will step down to. */
+const MIN_DPR = 1;
+/** Step quality down when the average frame takes longer than this (~45 fps). */
+const SLOW_FRAME_SECONDS = 1 / 45;
 const PRESS_KEYS = new Set([
   "w",
   "a",
@@ -122,11 +129,13 @@ function Sign({
   onClick?: () => void;
 }) {
   const texture = useMemo(() => {
+    // Draw at 2x and scale the context, so the layout math stays in 1024 units.
     const canvas = document.createElement("canvas");
-    canvas.width = 1024;
-    canvas.height = Math.round((1024 * height) / width);
+    canvas.width = 1024 * SIGN_TEXTURE_SCALE;
+    canvas.height = Math.round((1024 * height) / width) * SIGN_TEXTURE_SCALE;
     const ctx = canvas.getContext("2d")!;
-    const h = canvas.height;
+    ctx.scale(SIGN_TEXTURE_SCALE, SIGN_TEXTURE_SCALE);
+    const h = canvas.height / SIGN_TEXTURE_SCALE;
     ctx.fillStyle = color;
     ctx.fillRect(0, 0, 1024, h);
     ctx.strokeStyle = ink;
@@ -143,6 +152,7 @@ function Sign({
     }
     const tex = new THREE.CanvasTexture(canvas);
     tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 8;
     return tex;
   }, [text, sub, color, ink, width, height]);
   useEffect(() => () => texture.dispose(), [texture]);
@@ -229,6 +239,178 @@ function Burger({ position, scale = 1 }: { position: Vec; scale?: number }) {
   );
 }
 
+const SHAKE_FLAVOURS = {
+  strawberry: "#f4a6b8",
+  vanilla: "#f6e7c8",
+  chocolate: "#8a5a44",
+} as const;
+
+/** A diner milkshake: tall glass, whipped cream, cherry and a striped straw. */
+function Milkshake({
+  position,
+  flavour = "strawberry",
+  scale = 1,
+}: {
+  position: Vec;
+  flavour?: keyof typeof SHAKE_FLAVOURS;
+  scale?: number;
+}) {
+  const shake = SHAKE_FLAVOURS[flavour];
+  return (
+    <group position={position} scale={scale}>
+      {/* Glass foot and stem */}
+      <mesh position={[0, 0.02, 0]} castShadow>
+        <cylinderGeometry args={[0.16, 0.18, 0.04, 24]} />
+        <meshStandardMaterial color={palette.white} roughness={0.15} />
+      </mesh>
+      <mesh position={[0, 0.1, 0]}>
+        <cylinderGeometry args={[0.04, 0.05, 0.14, 12]} />
+        <meshStandardMaterial color={palette.white} roughness={0.15} />
+      </mesh>
+      {/* Shake in a flared glass */}
+      <mesh position={[0, 0.38, 0]} castShadow>
+        <cylinderGeometry args={[0.2, 0.12, 0.44, 28]} />
+        <meshStandardMaterial color={shake} roughness={0.45} />
+      </mesh>
+      <mesh position={[0, 0.61, 0]}>
+        <torusGeometry args={[0.2, 0.018, 8, 28]} />
+        <meshStandardMaterial color={palette.white} roughness={0.1} />
+      </mesh>
+      {/* Whipped cream in three swirls */}
+      {[0.66, 0.75, 0.83].map((y, i) => (
+        <mesh key={y} position={[0, y, 0]} castShadow>
+          <sphereGeometry args={[0.19 - i * 0.05, 20, 14]} />
+          <meshStandardMaterial color="#fffaf0" roughness={0.8} />
+        </mesh>
+      ))}
+      <mesh position={[0.02, 0.92, 0]} castShadow>
+        <sphereGeometry args={[0.055, 16, 12]} />
+        <meshStandardMaterial color={palette.red} roughness={0.25} />
+      </mesh>
+      {/* Striped straw */}
+      <group position={[0.08, 0.72, 0.04]} rotation={[0.1, 0, -0.22]}>
+        {Array.from({ length: 6 }, (_, i) => (
+          <mesh key={i} position={[0, i * 0.075 - 0.19, 0]}>
+            <cylinderGeometry args={[0.022, 0.022, 0.075, 10]} />
+            <meshStandardMaterial
+              color={i % 2 ? palette.white : palette.red}
+              roughness={0.4}
+            />
+          </mesh>
+        ))}
+      </group>
+    </group>
+  );
+}
+
+/** A chrome spindle mixer with a shake cup, as on a diner counter. */
+function ShakeMixer({ position }: { position: Vec }) {
+  return (
+    <group position={position}>
+      <Box
+        position={[0, 0.06, 0]}
+        size={[0.5, 0.12, 0.42]}
+        color={CHROME}
+        metal
+      />
+      <Box
+        position={[0, 0.5, -0.15]}
+        size={[0.14, 0.8, 0.12]}
+        color={DINER_RED}
+      />
+      <mesh
+        position={[0, 0.92, -0.02]}
+        rotation={[Math.PI / 2, 0, 0]}
+        castShadow
+      >
+        <cylinderGeometry args={[0.13, 0.13, 0.42, 20]} />
+        <meshStandardMaterial color={DINER_RED} roughness={0.35} />
+      </mesh>
+      <mesh position={[0, 0.66, 0.12]}>
+        <cylinderGeometry args={[0.012, 0.012, 0.36, 8]} />
+        <meshStandardMaterial color={CHROME} metalness={0.6} roughness={0.2} />
+      </mesh>
+      <mesh position={[0, 0.34, 0.12]} castShadow>
+        <cylinderGeometry args={[0.13, 0.1, 0.38, 20, 1, true]} />
+        <meshStandardMaterial
+          color={CHROME}
+          metalness={0.65}
+          roughness={0.2}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+    </group>
+  );
+}
+
+/** Glowing neon lettering on a dark backing, drawn once to a canvas. */
+function NeonSign({
+  text,
+  position,
+  rotation = [0, 0, 0],
+  width,
+  height,
+  glow,
+}: {
+  text: string;
+  position: Vec;
+  rotation?: Vec;
+  width: number;
+  height: number;
+  glow: string;
+}) {
+  const texture = useMemo(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 2048;
+    canvas.height = Math.round((2048 * height) / width);
+    const ctx = canvas.getContext("2d")!;
+    const h = canvas.height;
+    ctx.fillStyle = "#1b1418";
+    ctx.beginPath();
+    ctx.roundRect(0, 0, 2048, h, h * 0.18);
+    ctx.fill();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = `italic 800 ${h * 0.58}px system-ui, sans-serif`;
+    // Layer wide soft glows under a crisp white-hot core.
+    ctx.strokeStyle = glow;
+    ctx.lineJoin = "round";
+    for (const [blur, line] of [
+      [h * 0.22, h * 0.07],
+      [h * 0.1, h * 0.045],
+    ]) {
+      ctx.shadowColor = glow;
+      ctx.shadowBlur = blur;
+      ctx.lineWidth = line;
+      ctx.strokeText(text, 1024, h * 0.52, 1900);
+    }
+    ctx.shadowBlur = h * 0.04;
+    ctx.lineWidth = h * 0.018;
+    ctx.strokeStyle = "#fff4f7";
+    ctx.strokeText(text, 1024, h * 0.52, 1900);
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 8;
+    return tex;
+  }, [text, width, height, glow]);
+  useEffect(() => () => texture.dispose(), [texture]);
+  return (
+    <group position={position} rotation={rotation}>
+      <mesh>
+        <planeGeometry args={[width, height]} />
+        <meshBasicMaterial map={texture} transparent toneMapped={false} />
+      </mesh>
+      <pointLight
+        position={[0, 0, 0.6]}
+        color={glow}
+        intensity={2.2}
+        distance={4.5}
+        decay={2}
+      />
+    </group>
+  );
+}
+
 function Room({ onSelect }: { onSelect: (id: string) => void }) {
   const special = projects.find((p) => p.id === featuredProjectId)!;
   return (
@@ -241,7 +423,8 @@ function Room({ onSelect }: { onSelect: (id: string) => void }) {
         position={[2, 9, 6]}
         intensity={2.1}
         castShadow
-        shadow-mapSize={[1024, 1024]}
+        shadow-mapSize={[2048, 2048]}
+        shadow-radius={4}
         shadow-camera-left={-9}
         shadow-camera-right={9}
         shadow-camera-top={9}
@@ -440,7 +623,12 @@ function Room({ onSelect }: { onSelect: (id: string) => void }) {
             color={CHROME}
             metal
           />
-          <Burger position={[1.1, 1.32, 0]} scale={0.42} />
+          <Burger position={[1.1, 1.32, -0.3]} scale={0.42} />
+          <Milkshake
+            position={[1.3, 1.31, 0.4]}
+            flavour={z < 3 ? "strawberry" : "chocolate"}
+            scale={0.9}
+          />
         </group>
       ))}
       {RIGHT_BOOTHS.map((z) => (
@@ -465,6 +653,16 @@ function Room({ onSelect }: { onSelect: (id: string) => void }) {
             size={[0.15, 1.2, 0.15]}
             color={CHROME}
             metal
+          />
+          <Milkshake
+            position={[-1.2, 1.31, -0.25]}
+            flavour={z < 2 ? "vanilla" : "strawberry"}
+            scale={0.9}
+          />
+          <Milkshake
+            position={[-0.8, 1.31, 0.3]}
+            flavour="chocolate"
+            scale={0.9}
           />
         </group>
       ))}
@@ -491,6 +689,25 @@ function Room({ onSelect }: { onSelect: (id: string) => void }) {
           </group>
         )),
       )}
+      <ShakeMixer position={[4.35, 2.13, -2.3]} />
+      <Milkshake position={[1.55, 2.13, -2.05]} flavour="strawberry" />
+      <Milkshake position={[-1.35, 2.13, -2.2]} flavour="vanilla" />
+      <NeonSign
+        text="SHAKES"
+        position={[6.92, 5.08, 2.4]}
+        rotation={[0, -Math.PI / 2, 0]}
+        width={3.4}
+        height={1.05}
+        glow="#ff5c8a"
+      />
+      <NeonSign
+        text="MALTS"
+        position={[-6.92, 5.08, 2.4]}
+        rotation={[0, Math.PI / 2, 0]}
+        width={3}
+        height={1.05}
+        glow="#5cd6ff"
+      />
       <Sign
         text="FRESH IDEAS"
         sub="MADE FROM SCRATCH"
@@ -509,6 +726,30 @@ function Room({ onSelect }: { onSelect: (id: string) => void }) {
       />
     </>
   );
+}
+
+/**
+ * Renders at up to 2x pixel ratio, then steps down in 0.25 increments if the
+ * average frame time stays slow while exploring. It never steps back up, so
+ * quality doesn't oscillate.
+ */
+function AdaptiveQuality({ active }: { active: boolean }) {
+  const frames = useRef({ total: 0, count: 0 });
+  useFrame(({ viewport, setDpr }, delta) => {
+    // Only measure continuous rendering; skip hitches such as tab switches.
+    if (!active || delta > 0.25) return;
+    const f = frames.current;
+    f.total += delta;
+    f.count += 1;
+    if (f.count < 90) return;
+    const average = f.total / f.count;
+    f.total = 0;
+    f.count = 0;
+    if (average > SLOW_FRAME_SECONDS && viewport.dpr > MIN_DPR) {
+      setDpr(Math.max(MIN_DPR, viewport.dpr - 0.25));
+    }
+  });
+  return null;
 }
 
 function Walk({
@@ -911,9 +1152,9 @@ function RestaurantScene({ onSelect, onUnavailable }: RestaurantProps) {
     >
       <Canvas
         gl={webGLContextOptions}
-        shadows
+        shadows="soft"
         frameloop={active && visible ? "always" : "demand"}
-        dpr={[1, 1.5]}
+        dpr={[MIN_DPR, MAX_DPR]}
         camera={{ position: [0, 2.8, 8.65], fov: 59 }}
         onCreated={(state) => {
           invalidate.current = state.invalidate;
@@ -922,6 +1163,7 @@ function RestaurantScene({ onSelect, onUnavailable }: RestaurantProps) {
       >
         <Room onSelect={onSelect} />
         <Walk controls={controls} active={active} />
+        <AdaptiveQuality active={active && visible} />
       </Canvas>
       {ready && !active && (
         <div className="room-caption">

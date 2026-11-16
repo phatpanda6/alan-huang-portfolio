@@ -17,6 +17,7 @@ import {
   type Project,
 } from "../projects";
 import { contactEmail, themeVars } from "../theme";
+import dinerStill from "../../public/diner/diner-still.webp";
 import { canCreateWebGLContext } from "../webgl";
 
 const Restaurant = dynamic(() => import("./Restaurant"), {
@@ -195,116 +196,6 @@ function SampleCheck() {
   );
 }
 
-function DinerIllustration() {
-  return (
-    <svg
-      className="diner-illustration"
-      viewBox="0 0 720 360"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <defs>
-        <linearGradient id="diner-wall" x2="0" y2="1">
-          <stop stopColor="var(--white)" />
-          <stop offset="1" stopColor="var(--steel)" />
-        </linearGradient>
-        <linearGradient id="diner-floor" x2="0" y2="1">
-          <stop stopColor="var(--tile)" />
-          <stop offset="1" stopColor="var(--paper)" />
-        </linearGradient>
-      </defs>
-      <path d="M0 0H720V360H0Z" fill="url(#diner-wall)" />
-      <path d="M0 224 180 163H540L720 224V360H0Z" fill="url(#diner-floor)" />
-      <path
-        d="M0 35 180 82V163L0 224ZM720 35 540 82V163L720 224Z"
-        fill="var(--sky)"
-      />
-      <path d="M180 82H540V180H180Z" fill="var(--paper)" />
-      <path
-        d="M0 208 180 156H540L720 208"
-        fill="none"
-        stroke="var(--red)"
-        strokeWidth="9"
-      />
-      <path
-        d="M80 360 239 176M239 360 310 176M481 360 410 176M640 360 481 176M0 260H720M0 310H720"
-        fill="none"
-        stroke="var(--white)"
-        strokeOpacity=".65"
-        strokeWidth="2"
-      />
-      <path d="M181 180H539L557 199H163Z" fill="var(--steel)" />
-      <path d="M163 199H557V244H163Z" fill="var(--white)" />
-      <path d="M163 204H557V212H163Z" fill="var(--red)" />
-      {[210, 289, 368, 447].map((x) => (
-        <g key={x}>
-          <rect
-            x={x}
-            y="112"
-            width="63"
-            height="47"
-            rx="3"
-            fill="var(--white)"
-            stroke="var(--accent)"
-            strokeWidth="2"
-          />
-          <path
-            d={`M${x + 12} 130h39m-39 9h24`}
-            stroke="var(--red)"
-            strokeWidth="3"
-            strokeLinecap="round"
-          />
-        </g>
-      ))}
-      <rect
-        x="285"
-        y="76"
-        width="150"
-        height="25"
-        rx="4"
-        fill="var(--accent)"
-      />
-      <text
-        x="360"
-        y="93"
-        textAnchor="middle"
-        fill="var(--white)"
-        fontSize="11"
-        fontWeight="700"
-        letterSpacing="2"
-      >
-        STACK HOUSE
-      </text>
-      <path
-        d="M0 248 97 219V259L0 298ZM720 248 623 219V259L720 298Z"
-        fill="var(--accent)"
-      />
-      <path
-        d="M0 292 111 255 151 272 0 335ZM720 292 609 255 569 272 720 335Z"
-        fill="var(--red)"
-      />
-      <path
-        d="M41 262 134 231 197 248 101 288ZM679 262 586 231 523 248 619 288Z"
-        fill="var(--white)"
-      />
-      <ellipse
-        cx="360"
-        cy="325"
-        rx="40"
-        ry="10"
-        fill="var(--ink)"
-        opacity=".18"
-      />
-      <path d="M338 286h17v38h-17zm27 0h17v38h-17z" fill="var(--ink)" />
-      <rect x="326" y="248" width="68" height="54" rx="24" fill="var(--red)" />
-      <rect x="350" y="269" width="20" height="15" rx="4" fill="var(--gold)" />
-      <circle cx="332" cy="225" r="13" fill="var(--ink)" />
-      <circle cx="388" cy="225" r="13" fill="var(--ink)" />
-      <ellipse cx="360" cy="241" rx="34" ry="29" fill="var(--white)" />
-    </svg>
-  );
-}
-
 export function StackHouse() {
   const [selected, setSelected] = useState<Project | null>(null);
   const [room, setRoom] = useState<
@@ -332,6 +223,19 @@ export function StackHouse() {
     if (selected && element && !element.open) element.showModal();
     else if (!selected && element?.open) element.close();
   }, [selected]);
+  // Load the 3D scene (or show why it can't load) and bring it into view.
+  function openDiner() {
+    setRoom(canCreateWebGLContext() ? "open" : "unsupported");
+    // Wait for the taller scene frame to replace the poster before scrolling.
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() =>
+        dinerFrame.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "end",
+        }),
+      ),
+    );
+  }
   function select(id: string) {
     setSelected(projects.find((p) => p.id === id) ?? null);
   }
@@ -390,6 +294,28 @@ export function StackHouse() {
               GitHub <Arrow />
             </a>
           </div>
+          <button
+            type="button"
+            className="hero-teaser"
+            onClick={openDiner}
+            aria-label="Step inside the 3D diner. Loads an interactive 3D scene of the projects."
+          >
+            <Image
+              src={dinerStill}
+              alt=""
+              sizes="(max-width: 43rem) 100vw, 58rem"
+              placeholder="blur"
+              priority
+            />
+            <span className="hero-teaser-label">
+              <span>
+                <i aria-hidden="true" /> Interactive 3D portfolio
+              </span>
+              <b>
+                Step inside the diner <span aria-hidden="true">→</span>
+              </b>
+            </span>
+          </button>
         </section>
 
         <section
@@ -511,7 +437,13 @@ export function StackHouse() {
               />
             ) : (
               <div className="diner-poster">
-                <DinerIllustration />
+                <Image
+                  className="diner-still"
+                  src={dinerStill}
+                  alt="Inside the Stack House diner: a panda in a red jacket faces the counter, with milkshakes on the booths and project menu boards on the wall."
+                  sizes="(max-width: 43rem) 100vw, 73rem"
+                  placeholder="blur"
+                />
                 <span className="poster-label">
                   <i /> STACK HOUSE / 3D
                 </span>
@@ -533,15 +465,7 @@ export function StackHouse() {
               className={showRoom ? "secondary-button" : "house-button"}
               aria-expanded={showRoom}
               aria-controls="diner-scene"
-              onClick={() =>
-                setRoom(
-                  showRoom
-                    ? "poster"
-                    : canCreateWebGLContext()
-                      ? "open"
-                      : "unsupported",
-                )
-              }
+              onClick={() => (showRoom ? setRoom("poster") : openDiner())}
             >
               {showRoom
                 ? "Close 3D scene"
