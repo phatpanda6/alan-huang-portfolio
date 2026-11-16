@@ -1,3 +1,7 @@
+import type { StaticImageData } from "next/image";
+import contractlensCheck from "../public/projects/contractlens-check.webp";
+import workspaceGrid from "../public/projects/workspace-grid.webp";
+
 export type Project = {
   id: string;
   title: string;
@@ -11,6 +15,8 @@ export type Project = {
   status: string;
   evidence: { label: string; detail: string };
   stats?: { value: string; label: string }[];
+  image?: { src: StaticImageData; alt: string; caption: string };
+  walkthrough?: string;
   highlights: string[];
   note: string;
   color: string;
@@ -27,6 +33,9 @@ export const contribution = {
   stack: ["React", "TypeScript", "Vitest"],
 };
 
+// Projects listed here appear under "More projects" below the main work.
+export const moreProjectIds = ["php", "nba"];
+
 // Change this ID to give another project the house-special position.
 export const featuredProjectId = "contractlens";
 export const projects: Project[] = [
@@ -41,6 +50,13 @@ export const projects: Project[] = [
     stack: ["Next.js", "TypeScript", "PostgreSQL", "Prisma", "Playwright"],
     source: "https://github.com/phatpanda6/contractlens",
     live: "https://contractlens-iota.vercel.app/",
+    walkthrough: "https://www.loom.com/share/789d89b95aa64d328a32f2c0d16136d5",
+    image: {
+      src: contractlensCheck,
+      alt: "ContractLens reporting two breaking changes and one informational change, with the baseline and latest JSON responses side by side.",
+      caption:
+        "The live app after a check: price changed type and title went missing, so the check fails.",
+    },
     status: "Live demo",
     evidence: {
       label: "Verified workflow",
@@ -72,6 +88,12 @@ export const projects: Project[] = [
       "An Airtable-style workspace bringing a relational database and a type-safe API into a responsive interface.",
     stack: ["Next.js", "tRPC", "Prisma", "Tailwind"],
     live: "https://airtable-clone-chi-nine.vercel.app/",
+    image: {
+      src: workspaceGrid,
+      alt: "Relational Workspace grid view with name, notes, status and price columns, a views sidebar and a running sum in the footer.",
+      caption:
+        "The grid view: typed columns, editable cells and a live sum of the Price column.",
+    },
     status: "Project",
     evidence: {
       label: "Flexible data model",
@@ -83,14 +105,14 @@ export const projects: Project[] = [
       "Type-safe communication between the interface and API.",
       "Prisma connects application types with the database model.",
     ],
-    note: "A personal learning project exploring the interactions behind a relational workspace.",
+    note: "A personal project exploring the interactions behind a relational workspace.",
     color: "#3c7664",
   },
   {
     id: "php",
     number: "03",
     title: "PHP Announcements API",
-    category: "Backend learning project",
+    category: "Backend API",
     tagline: "Small API. Real fundamentals.",
     description:
       "A framework-free PHP API that validates JSON and creates and retrieves announcements from SQLite.",
@@ -107,7 +129,7 @@ export const projects: Project[] = [
       "Uses prepared statements and distinguishes malformed JSON from invalid fields.",
       "Validator and repository tests, plus a documented introductory EC2 exercise.",
     ],
-    note: "A work in progress using synthetic data. Create and list operations only; no authentication, update/delete, or public production deployment. The EC2 work was a temporary guided learning lab.",
+    note: "Scope: create and list operations on synthetic data, without authentication. Deployed to Ubuntu on EC2 in a guided lab; there is no public deployment.",
     color: "#b7853c",
   },
   {
