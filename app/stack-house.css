@@ -473,7 +473,7 @@
 }
 .menu-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.9rem;
   margin-top: 0.9rem;
 }
@@ -505,6 +505,72 @@
 .menu-item > p {
   color: var(--muted);
   font-size: 0.92rem;
+}
+.menu-item-wide {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: clamp(1.4rem, 4vw, 3rem);
+  margin-top: 0.9rem;
+}
+.menu-item-wide > * {
+  grid-column: 1;
+}
+.menu-item-wide > .project-evidence {
+  grid-column: 2;
+  grid-row: 1 / span 5;
+  align-self: center;
+  margin-top: 0;
+}
+.menu-item-wide > .project-evidence p {
+  font-size: 1rem;
+}
+.item-shot {
+  margin: 0;
+}
+.menu-item-wide > .item-shot {
+  grid-column: 2;
+  grid-row: 1 / span 6;
+  align-self: center;
+}
+.item-shot img {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+}
+.menu-item-wide.has-shot > .project-evidence {
+  grid-column: 1;
+  grid-row: auto;
+  align-self: auto;
+  margin-top: 1.1rem;
+}
+.menu-item-wide.has-shot > .project-evidence p {
+  font-size: 0.9rem;
+}
+.item-links {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.1rem;
+}
+.stack-house .more-heading {
+  margin-top: 2.2rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  line-height: 1.55;
+}
+.dialog-shot {
+  margin: 1.1rem 0 0.3rem;
+}
+.dialog-shot img {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+}
+.dialog-shot figcaption {
+  margin-top: 0.45rem;
+  color: var(--muted);
+  font-size: 0.8rem;
 }
 .item-bottom {
   margin-top: auto;
@@ -826,6 +892,20 @@
   .special,
   .maker {
     grid-template-columns: 1fr;
+  }
+  .menu-item-wide {
+    display: flex;
+  }
+  .menu-item-wide > .item-shot {
+    align-self: stretch;
+    margin-top: 1rem;
+  }
+  .menu-item-wide > .project-evidence {
+    align-self: stretch;
+    margin-top: 1.1rem;
+  }
+  .menu-item-wide > .project-evidence p {
+    font-size: 0.9rem;
   }
   .room-caption {
     top: 0.55rem;

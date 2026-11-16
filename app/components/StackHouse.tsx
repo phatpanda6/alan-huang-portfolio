@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import {
   useCallback,
   useEffect,
@@ -11,6 +12,7 @@ import {
 import {
   contribution,
   featuredProjectId,
+  moreProjectIds,
   projects,
   type Project,
 } from "../projects";
@@ -28,8 +30,6 @@ const Restaurant = dynamic(() => import("./Restaurant"), {
 
 const github = "https://github.com/phatpanda6";
 const linkedin = "https://www.linkedin.com/in/alan-huang-943257244/";
-const walkthrough =
-  "https://www.loom.com/share/789d89b95aa64d328a32f2c0d16136d5";
 const email = `mailto:${contactEmail}`;
 const Arrow = () => <span aria-hidden="true">↗</span>;
 
@@ -78,6 +78,74 @@ function Stats({ project }: { project: Project }) {
         </div>
       ))}
     </dl>
+  );
+}
+
+function ProjectCard({
+  project: p,
+  wide = false,
+  onSelect,
+}: {
+  project: Project;
+  wide?: boolean;
+  onSelect: (id: string) => void;
+}) {
+  return (
+    <article
+      className={
+        wide
+          ? `menu-item menu-item-wide${p.image ? " has-shot" : ""}`
+          : "menu-item"
+      }
+    >
+      <div className="item-top">
+        <span className="item-number">{p.number}</span>
+        <span className="tiny-label">{p.category}</span>
+      </div>
+      <h3>{p.title}</h3>
+      <p>{p.description}</p>
+      {wide && p.image && (
+        <figure className="item-shot">
+          <Image
+            src={p.image.src}
+            alt={p.image.alt}
+            sizes="(max-width: 43rem) 100vw, 34rem"
+          />
+        </figure>
+      )}
+      <Evidence project={p} />
+      <Tags project={p} />
+      <div className="item-bottom">
+        <button
+          aria-label={`Read about ${p.title}`}
+          onClick={() => onSelect(p.id)}
+        >
+          Details <span aria-hidden="true">→</span>
+        </button>
+        <span className="item-links">
+          {p.live && (
+            <a
+              href={p.live}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`Try ${p.title} live`}
+            >
+              Live demo <Arrow />
+            </a>
+          )}
+          {p.source && (
+            <a
+              href={p.source}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`View ${p.title} source code`}
+            >
+              Source <Arrow />
+            </a>
+          )}
+        </span>
+      </div>
+    </article>
   );
 }
 
@@ -267,6 +335,9 @@ export function StackHouse() {
   function select(id: string) {
     setSelected(projects.find((p) => p.id === id) ?? null);
   }
+  const rest = projects.filter((p) => p.id !== feature.id);
+  const mainProjects = rest.filter((p) => !moreProjectIds.includes(p.id));
+  const moreProjects = rest.filter((p) => moreProjectIds.includes(p.id));
 
   return (
     <div className="stack-house" id="top" style={themeVars as CSSProperties}>
@@ -355,6 +426,15 @@ export function StackHouse() {
                     Try live app <Arrow />
                   </a>
                 )}
+                {feature.walkthrough && (
+                  <a
+                    href={feature.walkthrough}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Watch walkthrough <Arrow />
+                  </a>
+                )}
               </div>
             </div>
             <div className="feature-visual">
@@ -369,49 +449,9 @@ export function StackHouse() {
               )}
             </div>
           </article>
-          <div className="menu-grid">
-            {projects
-              .filter((p) => p.id !== feature.id)
-              .map((p) => (
-                <article className="menu-item" key={p.id}>
-                  <div className="item-top">
-                    <span className="item-number">{p.number}</span>
-                    <span className="tiny-label">{p.category}</span>
-                  </div>
-                  <h3>{p.title}</h3>
-                  <p>{p.description}</p>
-                  <Evidence project={p} />
-                  <Tags project={p} />
-                  <div className="item-bottom">
-                    <button
-                      aria-label={`Read about ${p.title}`}
-                      onClick={() => select(p.id)}
-                    >
-                      Details <span aria-hidden="true">→</span>
-                    </button>
-                    {p.source ? (
-                      <a
-                        href={p.source}
-                        target="_blank"
-                        rel="noreferrer"
-                        aria-label={`View ${p.title} source code`}
-                      >
-                        Source <Arrow />
-                      </a>
-                    ) : p.live ? (
-                      <a
-                        href={p.live}
-                        target="_blank"
-                        rel="noreferrer"
-                        aria-label={`Try ${p.title} live`}
-                      >
-                        Live demo <Arrow />
-                      </a>
-                    ) : null}
-                  </div>
-                </article>
-              ))}
-          </div>
+          {mainProjects.map((p) => (
+            <ProjectCard key={p.id} project={p} wide onSelect={select} />
+          ))}
           <article className="contribution" id="open-source">
             <div>
               <p className="feature-label">
@@ -440,6 +480,12 @@ export function StackHouse() {
               View merged PR <Arrow />
             </a>
           </article>
+          <h3 className="more-heading tiny-label">More projects</h3>
+          <div className="menu-grid">
+            {moreProjects.map((p) => (
+              <ProjectCard key={p.id} project={p} onSelect={select} />
+            ))}
+          </div>
         </section>
 
         <section
@@ -518,15 +564,15 @@ export function StackHouse() {
           </div>
           <div>
             <p>
-              I’m Alan. I like tracing a problem all the way from the interface
-              to the data and back. My projects are how I practise shipping
-              complete workflows, testing what matters, and explaining the
-              trade-offs.
+              I’m Alan, a full-stack developer in Melbourne. I like tracing a
+              problem all the way from the interface to the data and back, then
+              proving the fix with tests.
             </p>
             <p>
-              I’m looking for my first full-stack developer role. I’m especially
-              interested in building useful product features and making them
-              reliable as they grow.
+              I ship complete workflows, test what matters and write down the
+              trade-offs, including the results that didn’t go my way. I’m
+              looking for a full-stack role where I can build useful product
+              features and keep them reliable as they grow.
             </p>
             <a href={linkedin} target="_blank" rel="noreferrer">
               Connect on LinkedIn <Arrow />
@@ -583,6 +629,16 @@ export function StackHouse() {
             <p className="dialog-tagline">{selected.tagline}</p>
             <p>{selected.description}</p>
             <Tags project={selected} />
+            {selected.image && (
+              <figure className="dialog-shot">
+                <Image
+                  src={selected.image.src}
+                  alt={selected.image.alt}
+                  sizes="(max-width: 43rem) 100vw, 40rem"
+                />
+                <figcaption>{selected.image.caption}</figcaption>
+              </figure>
+            )}
             <Evidence project={selected} />
             <Stats project={selected} />
             <h3>How it works</h3>
@@ -608,8 +664,12 @@ export function StackHouse() {
                   View source <Arrow />
                 </a>
               )}
-              {selected.id === "contractlens" && (
-                <a href={walkthrough} target="_blank" rel="noreferrer">
+              {selected.walkthrough && (
+                <a
+                  href={selected.walkthrough}
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   Watch walkthrough <Arrow />
                 </a>
               )}

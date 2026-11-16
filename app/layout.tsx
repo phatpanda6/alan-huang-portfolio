@@ -41,14 +41,14 @@ export const metadata: Metadata = {
     url: "/",
     title: "Alan Huang | Full-Stack Developer",
     description:
-      "Alan Huang’s interactive portfolio: thoughtful interfaces, reliable APIs, and care at every layer.",
+      "Full-stack developer in Melbourne. Builder of ContractLens, an API change checker backed by 165 automated tests and CI.",
     siteName: "Alan Huang",
     images: [
       {
         url: "/og.png",
-        width: 1792,
-        height: 936,
-        alt: "Alan Huang, full-stack developer building ContractLens",
+        width: 1200,
+        height: 630,
+        alt: "Alan Huang, full-stack developer. Software that holds up, with a ContractLens check flagging a breaking API change.",
       },
     ],
   },
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Alan Huang | Full-Stack Developer",
     description:
-      "Alan Huang’s interactive portfolio: thoughtful interfaces, reliable APIs, and care at every layer.",
+      "Full-stack developer in Melbourne. Builder of ContractLens, an API change checker backed by 165 automated tests and CI.",
     images: ["/og.png"],
   },
   icons: {
