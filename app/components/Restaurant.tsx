@@ -15,6 +15,7 @@ import {
 import * as THREE from "three";
 import { projects, featuredProjectId } from "../projects";
 import { palette } from "../theme";
+import { webGLContextOptions } from "../webgl";
 
 type Vec = [number, number, number];
 type Controls = {
@@ -168,7 +169,11 @@ function Sign({
       }}
     >
       <planeGeometry args={[width, height]} />
-      <meshBasicMaterial map={texture} side={THREE.DoubleSide} toneMapped={false} />
+      <meshBasicMaterial
+        map={texture}
+        side={THREE.DoubleSide}
+        toneMapped={false}
+      />
     </mesh>
   );
 }
@@ -689,30 +694,27 @@ function Walk({
 }
 
 class SceneBoundary extends Component<
-  { children: ReactNode },
+  { children: ReactNode; onUnavailable: () => void },
   { failed: boolean }
 > {
   state = { failed: false };
   static getDerivedStateFromError() {
     return { failed: true };
   }
+  componentDidCatch() {
+    this.props.onUnavailable();
+  }
   render() {
-    return this.state.failed ? (
-      <div className="scene-fallback">
-        The 3D room couldn’t load on this device.
-        <a href="#menu">Explore all projects below ↓</a>
-      </div>
-    ) : (
-      this.props.children
-    );
+    return this.state.failed ? null : this.props.children;
   }
 }
 
-export default function Restaurant({
-  onSelect,
-}: {
+type RestaurantProps = {
   onSelect: (id: string) => void;
-}) {
+  onUnavailable: () => void;
+};
+
+function RestaurantScene({ onSelect, onUnavailable }: RestaurantProps) {
   const controls = useRef<Controls>({
     keys: new Set(),
     yaw: 0,
@@ -724,7 +726,8 @@ export default function Restaurant({
   });
   const drag = useRef<OrbitDrag | null>(null);
   const [active, setActive] = useState(false);
-  const [ready, setReady] = useState(false);
+  const [renderer, setRenderer] = useState<THREE.WebGLRenderer | null>(null);
+  const ready = renderer !== null;
   const [visible, setVisible] = useState(true);
   const invalidate = useRef<(() => void) | null>(null);
   const room = useRef<HTMLDivElement>(null);
@@ -737,6 +740,20 @@ export default function Restaurant({
     controls.current.keys.clear();
     stopOrbit(controls.current);
   }, []);
+
+  useEffect(() => {
+    if (!renderer) return;
+    const canvas = renderer.domElement;
+    function handleContextLoss() {
+      cancelInteraction();
+      onUnavailable();
+    }
+    canvas.addEventListener("webglcontextlost", handleContextLoss);
+    // Catch a loss between onCreated and this effect's listener setup.
+    if (renderer.getContext().isContextLost()) handleContextLoss();
+    return () =>
+      canvas.removeEventListener("webglcontextlost", handleContextLoss);
+  }, [renderer, cancelInteraction, onUnavailable]);
 
   useEffect(() => {
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -864,8 +881,12 @@ export default function Restaurant({
       className="room"
       data-active={active}
       ref={room}
-      tabIndex={0}
-      aria-label="Third-person diner. Enter to explore, use WASD or arrow keys to walk, drag to orbit the camera. Escape pauses."
+      tabIndex={ready ? 0 : undefined}
+      aria-label={
+        ready
+          ? "Third-person diner. Enter to explore, use WASD or arrow keys to walk, drag to orbit the camera. Escape pauses."
+          : undefined
+      }
       onBlur={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget)) {
           cancelInteraction();
@@ -888,27 +909,21 @@ export default function Restaurant({
         if (drag.current?.pointerId === e.pointerId) cancelInteraction();
       }}
     >
-      <SceneBoundary>
-        <Canvas
-          shadows
-          frameloop={active && visible ? "always" : "demand"}
-          dpr={[1, 1.5]}
-          camera={{ position: [0, 2.8, 8.65], fov: 59 }}
-          onCreated={(state) => {
-            invalidate.current = state.invalidate;
-            setReady(true);
-          }}
-          fallback={
-            <div className="scene-fallback">
-              Explore the project menu below.
-            </div>
-          }
-        >
-          <Room onSelect={onSelect} />
-          <Walk controls={controls} active={active} />
-        </Canvas>
-      </SceneBoundary>
-      {!active && (
+      <Canvas
+        gl={webGLContextOptions}
+        shadows
+        frameloop={active && visible ? "always" : "demand"}
+        dpr={[1, 1.5]}
+        camera={{ position: [0, 2.8, 8.65], fov: 59 }}
+        onCreated={(state) => {
+          invalidate.current = state.invalidate;
+          setRenderer(state.gl);
+        }}
+      >
+        <Room onSelect={onSelect} />
+        <Walk controls={controls} active={active} />
+      </Canvas>
+      {ready && !active && (
         <div className="room-caption">
           <span className="tiny-label">A portfolio you can step inside</span>
           <strong>
@@ -927,36 +942,38 @@ export default function Restaurant({
         GOODNESS
       </div>
       <div className="room-toolbar">
-        <span className="room-status">
+        <span className="room-status" role="status">
           <i />
           {active
             ? "YOU’RE IN. MAKE YOURSELF AT HOME."
             : ready
               ? "THE DOORS ARE OPEN"
-              : "SETTING THE TABLE…"}
+              : "LOADING THE 3D DINER…"}
         </span>
-        <div>
-          <button
-            onClick={() => {
-              setActive(!active);
-              cancelInteraction();
-              room.current?.focus({ preventScroll: true });
-            }}
-          >
-            {active ? "Pause exploring" : "Enter the restaurant"}{" "}
-            <span aria-hidden="true">↗</span>
-          </button>
-          <button
-            className="reset-view"
-            onClick={() => {
-              controls.current.reset = true;
-              cancelInteraction();
-              invalidate.current?.();
-            }}
-          >
-            Reset view
-          </button>
-        </div>
+        {ready && (
+          <div>
+            <button
+              onClick={() => {
+                setActive(!active);
+                cancelInteraction();
+                room.current?.focus({ preventScroll: true });
+              }}
+            >
+              {active ? "Pause exploring" : "Enter the restaurant"}{" "}
+              <span aria-hidden="true">↗</span>
+            </button>
+            <button
+              className="reset-view"
+              onClick={() => {
+                controls.current.reset = true;
+                cancelInteraction();
+                invalidate.current?.();
+              }}
+            >
+              Reset view
+            </button>
+          </div>
+        )}
       </div>
       {active && (
         <>
@@ -991,5 +1008,13 @@ export default function Restaurant({
         </>
       )}
     </div>
+  );
+}
+
+export default function Restaurant(props: RestaurantProps) {
+  return (
+    <SceneBoundary onUnavailable={props.onUnavailable}>
+      <RestaurantScene {...props} />
+    </SceneBoundary>
   );
 }

@@ -285,6 +285,76 @@
   margin-top: 0.3rem;
   font-size: 0.9rem;
 }
+.project-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-top: 1.1rem;
+}
+.project-stats div {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  gap: 0.2rem;
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  padding: 0.7rem 0.8rem;
+}
+.project-stats dd {
+  font-size: 1.45rem;
+  font-weight: 680;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.project-stats dt {
+  color: var(--muted);
+  font-size: 0.74rem;
+  line-height: 1.35;
+}
+.contribution {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  margin-top: 0.9rem;
+  border-radius: 1.3rem;
+  background: var(--white);
+  border: 1px solid var(--line);
+  padding: 1.4rem;
+  scroll-margin-top: 6rem;
+}
+.contribution > div {
+  flex: 1 1 24rem;
+  max-width: 44rem;
+}
+.contribution h3 {
+  font-size: 1.5rem;
+  margin: 0.7rem 0 0.55rem;
+}
+.contribution h3 span {
+  color: var(--muted);
+  font-weight: 560;
+}
+.contribution p:not(.feature-label) {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+.contribution .contribution-summary {
+  color: var(--ink);
+  font-size: 1rem;
+  margin-bottom: 0.3rem;
+}
+.contribution .house-tags {
+  margin-bottom: 0;
+}
+.intro-meta {
+  margin-top: 0.9rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 560;
+}
 .house-tags {
   display: flex;
   flex-wrap: wrap;
@@ -492,6 +562,21 @@
   padding-top: 0.85rem;
   color: var(--muted);
   font-size: 0.85rem;
+}
+.diner-notice {
+  margin-top: 0.75rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.8rem;
+  background: var(--white);
+  font-size: 0.9rem;
+}
+.diner-notice a {
+  display: inline-block;
+  margin-top: 0.3rem;
+  color: var(--accent);
+  font-weight: 650;
+  text-decoration: underline;
 }
 .room {
   position: relative;

@@ -1,9 +1,21 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { featuredProjectId, projects, type Project } from "../projects";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
+import {
+  contribution,
+  featuredProjectId,
+  projects,
+  type Project,
+} from "../projects";
 import { contactEmail, themeVars } from "../theme";
+import { canCreateWebGLContext } from "../webgl";
 
 const Restaurant = dynamic(() => import("./Restaurant"), {
   ssr: false,
@@ -52,6 +64,20 @@ function Evidence({ project }: { project: Project }) {
       <span className="tiny-label">{project.evidence.label}</span>
       <p>{project.evidence.detail}</p>
     </div>
+  );
+}
+
+function Stats({ project }: { project: Project }) {
+  if (!project.stats) return null;
+  return (
+    <dl className="project-stats">
+      {project.stats.map((stat) => (
+        <div key={stat.label}>
+          <dt>{stat.label}</dt>
+          <dd>{stat.value}</dd>
+        </div>
+      ))}
+    </dl>
   );
 }
 
@@ -213,7 +239,23 @@ function DinerIllustration() {
 
 export function StackHouse() {
   const [selected, setSelected] = useState<Project | null>(null);
-  const [showRoom, setShowRoom] = useState(false);
+  const [room, setRoom] = useState<
+    "poster" | "open" | "unsupported" | "failed"
+  >("poster");
+  const showRoom = room === "open";
+  const roomNotice =
+    room === "unsupported"
+      ? "3D is unavailable in this browser. Try opening the site in a browser with WebGL 2 enabled."
+      : room === "failed"
+        ? "The 3D diner stopped loading or lost graphics access. You can retry or browse the projects."
+        : null;
+  const dinerFrame = useRef<HTMLDivElement>(null);
+  const dinerButton = useRef<HTMLButtonElement>(null);
+  const handleRoomUnavailable = useCallback(() => {
+    if (dinerFrame.current?.contains(document.activeElement))
+      dinerButton.current?.focus();
+    setRoom("failed");
+  }, []);
   const dialog = useRef<HTMLDialogElement>(null);
   const feature =
     projects.find((p) => p.id === featuredProjectId) ?? projects[0];
@@ -255,8 +297,14 @@ export function StackHouse() {
             <em>holds up.</em>
           </h1>
           <p className="intro-description">
-            I build interfaces, APIs and the systems behind them. Based in
-            Australia, open to full-stack roles in Melbourne and Sydney.
+            I build tested TypeScript applications end to end. ContractLens, my
+            API change checker, is backed by 165 automated tests and CI, and
+            I’ve had a fix merged into an open-source React project.
+          </p>
+          <p className="intro-meta">
+            Melbourne <span aria-hidden="true">·</span> Australian citizen{" "}
+            <span aria-hidden="true">·</span> Open to full-stack roles in
+            Melbourne and Sydney
           </p>
           <div className="hero-actions">
             <a className="house-button" href="#menu">
@@ -293,6 +341,7 @@ export function StackHouse() {
               <h3>{feature.title}</h3>
               <p className="feature-description">{feature.description}</p>
               <Evidence project={feature} />
+              <Stats project={feature} />
               <Tags project={feature} />
               <div className="project-actions">
                 <button
@@ -341,11 +390,21 @@ export function StackHouse() {
                       Details <span aria-hidden="true">→</span>
                     </button>
                     {p.source ? (
-                      <a href={p.source} target="_blank" rel="noreferrer" aria-label={`View ${p.title} source code`}>
+                      <a
+                        href={p.source}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label={`View ${p.title} source code`}
+                      >
                         Source <Arrow />
                       </a>
                     ) : p.live ? (
-                      <a href={p.live} target="_blank" rel="noreferrer" aria-label={`Try ${p.title} live`}>
+                      <a
+                        href={p.live}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label={`Try ${p.title} live`}
+                      >
                         Live demo <Arrow />
                       </a>
                     ) : null}
@@ -353,6 +412,34 @@ export function StackHouse() {
                 </article>
               ))}
           </div>
+          <article className="contribution" id="open-source">
+            <div>
+              <p className="feature-label">
+                <i /> OPEN-SOURCE CONTRIBUTION <span> / Merged</span>
+              </p>
+              <h3>
+                {contribution.project} <span>PR {contribution.pull}</span>
+              </h3>
+              <p className="contribution-summary">{contribution.summary}</p>
+              <p>{contribution.detail}</p>
+              <ul
+                className="house-tags"
+                aria-label={`${contribution.project} technologies`}
+              >
+                {contribution.stack.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+            <a
+              className="secondary-button"
+              href={contribution.url}
+              target="_blank"
+              rel="noreferrer"
+            >
+              View merged PR <Arrow />
+            </a>
+          </article>
         </section>
 
         <section
@@ -370,9 +457,12 @@ export function StackHouse() {
               boards to explore the same projects.
             </p>
           </div>
-          <div className="experience-frame" id="diner-scene">
+          <div className="experience-frame" id="diner-scene" ref={dinerFrame}>
             {showRoom ? (
-              <Restaurant onSelect={select} />
+              <Restaurant
+                onSelect={select}
+                onUnavailable={handleRoomUnavailable}
+              />
             ) : (
               <div className="diner-poster">
                 <DinerIllustration />
@@ -382,15 +472,36 @@ export function StackHouse() {
               </div>
             )}
           </div>
+          {roomNotice && (
+            <div className="diner-notice">
+              <p role="status">{roomNotice}</p>
+              <a href="#menu">
+                Browse selected work <span aria-hidden="true">↑</span>
+              </a>
+            </div>
+          )}
           <div className="experience-bottom">
             <p>Optional experience · keyboard and touch controls</p>
             <button
+              ref={dinerButton}
               className={showRoom ? "secondary-button" : "house-button"}
               aria-expanded={showRoom}
               aria-controls="diner-scene"
-              onClick={() => setShowRoom(!showRoom)}
+              onClick={() =>
+                setRoom(
+                  showRoom
+                    ? "poster"
+                    : canCreateWebGLContext()
+                      ? "open"
+                      : "unsupported",
+                )
+              }
             >
-              {showRoom ? "Close 3D scene" : "Load the 3D diner"}{" "}
+              {showRoom
+                ? "Close 3D scene"
+                : roomNotice
+                  ? "Retry 3D"
+                  : "Load the 3D diner"}{" "}
               <span aria-hidden="true">{showRoom ? "×" : "→"}</span>
             </button>
           </div>
@@ -473,6 +584,7 @@ export function StackHouse() {
             <p>{selected.description}</p>
             <Tags project={selected} />
             <Evidence project={selected} />
+            <Stats project={selected} />
             <h3>How it works</h3>
             <ul className="project-highlights">
               {selected.highlights.map((s) => (

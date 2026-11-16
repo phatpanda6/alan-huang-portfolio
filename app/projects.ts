@@ -10,9 +10,21 @@ export type Project = {
   live?: string;
   status: string;
   evidence: { label: string; detail: string };
+  stats?: { value: string; label: string }[];
   highlights: string[];
   note: string;
   color: string;
+};
+
+export const contribution = {
+  project: "o8",
+  pull: "#3340",
+  url: "https://github.com/hurttlocker/o8/pull/3340",
+  summary:
+    "Fixed the copy button reporting success before the clipboard write had finished.",
+  detail:
+    "Agreed the approach with the maintainer first, then added 6 Vitest regression tests for success, failure and timing and saw it through review.",
+  stack: ["React", "TypeScript", "Vitest"],
 };
 
 // Change this ID to give another project the house-special position.
@@ -35,10 +47,17 @@ export const projects: Project[] = [
       detail:
         "A Playwright test with isolated PostgreSQL verifies PASS → FAIL → accept a new baseline → PASS, with the earlier failure preserved.",
     },
+    stats: [
+      { value: "165", label: "Vitest unit and API route tests" },
+      { value: "6", label: "Playwright browser tests" },
+      { value: "CI", label: "Tests, lint, build and browser tests on every push" },
+    ],
     highlights: [
-      "Deterministic schema comparison identifies missing fields and type changes.",
-      "Explicit baseline acceptance preserves the history of earlier failed checks.",
-      "Vitest and Playwright exercise the engine and persisted browser workflow.",
+      "The comparison engine is plain TypeScript, separate from the UI and database, so the web app and a command-line checker share one pass or fail rule (exit codes 0, 1 and 2 for scripts and CI).",
+      "Removed fields and type changes are flagged as breaking, and check history is kept when a new baseline is accepted.",
+      "GitHub Actions runs the tests, lint, the production build and the browser tests against PostgreSQL on every push.",
+      "Live checks are hardened with URL and redirect validation, a 5-second timeout, a 1 MiB response limit and structured logs for every run.",
+      "A Claude Code skill traces each changed field to the code reading it and only reports a confirmed break when a test fails. I compared it with plain Claude over 3 runs each and published the results, including where it did worse.",
     ],
     note: "The public demo uses built-in endpoints and shared state. Optional AI explanations are available in local development; live AI generation is disabled in the hosted demo.",
     color: "#c84c30",
