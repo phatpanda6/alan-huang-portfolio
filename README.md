@@ -54,5 +54,5 @@ npm test
 ## Contact
 
 - [GitHub](https://github.com/phatpanda6)
-- [LinkedIn](https://www.linkedin.com/in/alan-huang-943257244/)
+- [LinkedIn](https://www.linkedin.com/in/alan-h-943257244/)
 - [Email](mailto:alan.huang5@gmail.com)

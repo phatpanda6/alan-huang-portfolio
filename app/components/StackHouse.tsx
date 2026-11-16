@@ -29,7 +29,7 @@ const Restaurant = dynamic(() => import("./Restaurant"), {
 });
 
 const github = "https://github.com/phatpanda6";
-const linkedin = "https://www.linkedin.com/in/alan-huang-943257244/";
+const linkedin = "https://www.linkedin.com/in/alan-h-943257244/";
 const email = `mailto:${contactEmail}`;
 const Arrow = () => <span aria-hidden="true">↗</span>;
 
